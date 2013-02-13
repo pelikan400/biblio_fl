@@ -1,5 +1,3 @@
-console.log( "Hallo" );
-
 require.config( {
    packages: [
       {
@@ -33,7 +31,7 @@ require.config( {
 } );
 
 require( [ "jquery", "twitter-bootstrap", "angular", "underscore" ],
-         function( jquery, bootstrap, angular, _  ) {
-       console.log( "Hello world!" );
-} );
+   function( jquery, bootstrap, angular, _  ) {
+   } 
+);
 

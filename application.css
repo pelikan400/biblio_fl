@@ -1,0 +1,150 @@
+/** General Purpose Styles **/
+
+.invisible {
+   visibility: hidden
+}
+
+li.action.disabled a, a.disabled, .breadcrumb .active a {
+   pointer-events: none;
+   cursor: default;
+}
+
+.breadcrumb .active a {
+	color: #333;
+}
+
+li.action.disabled a, .btn.disabled {
+	color: #999;
+	opacity: 0.5;
+}
+
+.centered-text {
+   text-align:center
+}
+
+.spinning {
+	animation-duration: 1s;
+   animation-iteration-count: infinite;
+   animation-timing-function: linear;
+   animation-name: spinningAnimation;
+}
+
+@keyframes spinningAnimation {
+   0% { transform: rotate(0deg); }
+   100% { transform: rotate(360deg); }
+}
+
+.workingGlow {
+   animation-duration: 1.5s;
+   animation-iteration-count: infinite;
+   animation-timing-function: linear;
+   animation-name: workingGlow;
+}
+
+@keyframes workingGlow {
+   0% {background: transparent;}
+   10% {background: #08C; }
+   100% {background: transparent;}
+}
+
+/** Application Styles **/
+
+i.icon-remove:hover {
+  background-color: rgba(255,0,0,.25);
+}
+
+i.clickable:hover {
+   cursor: pointer;
+}
+
+i.disabled {
+   opacity: 0.5;
+   pointer-events: none; /* Removing link click ability like this does not work in older versions of MSIE. */
+   cursor: default;
+}
+
+fieldset {
+   margin-bottom: 30px;
+}
+
+i.legendIcon {
+   position: relative; 
+   top: 5px;
+   margin-right: 5px;
+}
+
+td.rowFocussedActions {
+	width: 3%;
+}
+
+tr.active td {
+   background-color: #D9EDF7 !important;
+}
+
+tr.hover td {
+   background-color: #D9EDF7 !important;
+}
+
+.btn-group.secondary {
+	margin-left: 15px;
+}
+
+.btn-toolbar form.navbar-search {
+	margin-top: 0px;
+}
+
+/** Upload Dialog **/
+
+#uploadModal {
+   width: 80%;
+}
+
+#uploadModal .modal-body {
+   height: 400px;
+   max-height: 400px;
+}
+
+.dragArea {
+   height: 80px;
+}
+
+table.users th, table.dataSources th {
+   min-width: 60px;
+}
+
+table.publications th {
+	min-width: 82px;
+}
+
+/** Publish Dialog **/
+
+#publishModal {
+   width: 80%;
+}
+
+#publishModal .modal-body {
+   height: 400px;
+   max-height: 400px;
+}
+
+/** Table **/
+tr.finished-error td {
+   background-color: #F2DEDE !important;
+   transition: background-color 1s ease-out;
+}
+
+@keyframes mark-error {
+   0% {background: transparent;}
+   10% {background: #F2DEDE; }
+   100% {background: transparent;}
+}
+
+tr.finished-success td {
+   animation: flash-success 1.2s;
+}
+
+@keyframes flash-success {
+   0% {background: transparent;}
+   10% {background: #D6E9C6; }
+   100% {background: transparent;}
+}

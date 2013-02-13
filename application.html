@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+      <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+      <title>Bibliothek KGS Forster Linde</title>
+
+      <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+      <link rel="stylesheet" href="application.css">
+    
+      <style type="text/css">
+         [ng\:cloak], [data-ng-cloak], [ng-cloak], .ng-cloak {
+            display: none;
+         }
+      </style>
+   </head>
+   <body>
+
+<div class="container" data-ng-controller="ApplicationController">
+   <div class="hero-unit centered-text">
+      <h2></h2>
+   </div>
+
+   <div class="row">
+      <div class="span12">
+
+         <ul class="breadcrumb" data-ng-cloak>
+      
+           <li data-ng-repeat="crumb in breadcrumbs" data-ng-class="{ 'active': $last }">
+             <a href="{{crumb.href}}">{{crumb.label}}</a> <span data-ng-hide="$last" class="divider">/</span>
+           </li>
+      
+         </ul>
+
+      </div>
+      
+  </div>
+
+   <div class="row">
+      <div class="span12">
+
+         <div data-aix-messages="messages"></div>
+
+      </div>
+   </div>
+
+   <div class="row">
+      <div class="span12">
+         <div data-ng-view></div>
+      </div>
+   </div>
+</div>
+
+<script src="lib/requirejs/require.js"></script>
+<script src="allModules.js"></script>
+<script src="lib/bootstrap/js/bootstrap.js"></script>
+
+</body>
+</html>

@@ -30,8 +30,12 @@ require.config( {
    
 } );
 
-require( [ "jquery", "twitter-bootstrap", "angular", "underscore" ],
-   function( jquery, bootstrap, angular, _  ) {
+require( [ "jquery", "twitter-bootstrap", "underscore", "angular", "angularApplication" ],
+   function( jquery, bootstrap, _, angular, angularApplication ) {
+       var angularModule = angular.module( "bibliothek.ixoid.de", [] );
+       angularApplication.importInto( angularModule );
+       angular.bootstrap( document, [ 'bibliothek.ixoid.de' ] );
    } 
+
 );
 

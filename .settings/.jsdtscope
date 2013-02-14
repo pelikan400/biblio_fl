@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="lib/angular/docs/|lib/jquery/|lib/prefixfree/|lib/requirejs/|lib/bootstrap/js/|lib/angular/i18n/|lib/underscore/|lib/angular/docs/js/|lib/angular/" kind="src" path=""/>
+	<classpathentry excluding="docs/|i18n/|docs/js/" kind="src" path="lib/angular"/>
+	<classpathentry excluding="js/" kind="src" path="lib/angular/docs"/>
+	<classpathentry kind="src" path="lib/angular/docs/js"/>
+	<classpathentry kind="src" path="lib/angular/i18n"/>
+	<classpathentry kind="src" path="lib/bootstrap/js"/>
+	<classpathentry kind="src" path="lib/jquery"/>
+	<classpathentry kind="src" path="lib/prefixfree"/>
+	<classpathentry kind="src" path="lib/requirejs"/>
+	<classpathentry kind="src" path="lib/underscore"/>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path=""/>
+</classpath>

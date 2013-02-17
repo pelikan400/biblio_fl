@@ -1,5 +1,5 @@
-<!DOCTYPE HTML>
-<html>
+<!DOCTYPE html>
+<html lang="de">
    <head>
       <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
       <title>Bibliothek KGS Forster Linde</title>
@@ -15,55 +15,52 @@
 </head>
 <body>
 
-<div class="container">
-   <div class="hero-unit centered-text">
-      <h2></h2>
+<div class="container-fluid"  data-ng-controller="BookLoansController">
+   <div class="navbar">
+     <div class="navbar-inner">
+       <a class="brand" href="#">Biblio FL</a>
+       <ul class="nav">
+         <li class="active"><a href="#">Ausleihen</a></li>
+         <li><a href="#">Bücher</a></li>
+         <li><a href="#">Personen</a></li>
+       </ul>
+     </div>
    </div>
 
-   <div class="row">
-      <div class="span12">
-
-         <ul class="breadcrumb" data-ng-cloak>
-      
-           <li data-ng-repeat="crumb in breadcrumbs" data-ng-class="{ 'active': $last }">
-             <a href="{{crumb.href}}">{{crumb.label}}</a> <span data-ng-hide="$last" class="divider">/</span>
-           </li>
-      
-         </ul>
-
-      </div>
-      
-  </div>
-
-   <div class="row">
-      <div class="span12">
-
-         <div data-aix-messages="messages"></div>
-
-      </div>
-   </div>
-
-   <div class="row">
+   <div class="row-fluid">
       <div class="span5">
-         <form ng-submit="parseGeneralInput()" data-ng-controller="BookLoansController">
+         <form ng-submit="parseGeneralInput()">
             <input type="text" ng-model="generalInputText">
-
-            <div ng-repeat="book in books"> 
-               <div>{{book}}</div>
-            </div>
          </form>
-         <div data-ng-view></div>
+      </div>
+      <div class="span7">
+         <p>{{ patron.firstName }} {{ patron.lastName }} <span class="label label-info">{{ patron.barcode }}</span></p>
       </div>
    </div>
 
-   <div class="row">
+   <div class="row-fluid">
+      <div class="span5">
+         <div ng-repeat="book in issuedBooks"> 
+            <div><p>
+            <span ng-switch on="book.issuedStatus">
+               <span ng-switch-when="RETURNED" class="badge badge-success">R</span>
+               <span ng-switch-when="ISSUED" class="badge badge-important">A</span>
+            </span>
+             {{book.title}}
+            </p></div>
+         </div>
+      </div>
+   </div>
+
+   <div class="row-fluid">
       <div class="span12">
          <div data-ng-view></div>
       </div>
    </div>
 </div>
 
-<script src="lib/requirejs/require.js" data-main="application"></script>
+<script src="lib/requirejs/require.js"></script>
+<script src="application.js"></script>
 
 </body>
 </html>

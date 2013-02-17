@@ -69,7 +69,7 @@ define( function() {
                            else {
                               // change the patron and set to RETURNED
                               book.issuedStatus = "RETURNED";
-                              $scope.patron = book.issuedBy;
+                              $scope.patron = book.patron;
                            }
                         }
                         getIssuedBooks();

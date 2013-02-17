@@ -30,11 +30,11 @@
    <div class="row-fluid">
       <div class="span5">
          <form ng-submit="parseGeneralInput()">
-            <input type="text" ng-model="generalInputText">
+            <input class="input-xlarge" type="text" ng-model="generalInputText">
          </form>
       </div>
-      <div class="span7">
-         <p>{{ patron.firstName }} {{ patron.lastName }} <span class="label label-info">{{ patron.barcode }}</span></p>
+      <div class="span7" ng-show="patron">
+         <p><span class="label label-info">{{ patron.barcode }}</span> <span class="label">{{ patron.firstName }} {{ patron.lastName }} </span><i class="icon-edit"></i></p>
       </div>
    </div>
 
@@ -43,14 +43,69 @@
          <div ng-repeat="book in issuedBooks"> 
             <div><p>
             <span ng-switch on="book.issuedStatus">
-               <span ng-switch-when="RETURNED" class="badge badge-success">R</span>
-               <span ng-switch-when="ISSUED" class="badge badge-important">A</span>
+               <span ng-switch-when="RETURNED" class="label label-success">{{book.barcode}}<i class="icon-ok"></i> </span>
+               <span ng-switch-when="ISSUED" class="label label-important">{{book.barcode}}<i class="icon-share"></i></span>
             </span>
-             {{book.title}}
+             <span>{{book.title}}</span>
+             <i class="icon-edit"></i>
             </p></div>
          </div>
       </div>
    </div>
+
+   <div ng-controller="PatronsController">
+      <form ng-submit="editPatron()">
+         <div class="row-fluid">
+            <h3>Neue Person</h3>
+         </div>
+         <hr/>
+         <div class="controls controls-row">
+            <input class="span3" type="text" name="patron.firstName" placeholder="Vorname">
+            <input class="span3" type="text" name="editablePatron.lastName" placeholder="Nachname">
+         </div>
+         <div class="controls controls-row">
+            <select class="span3" name="type">
+               <option value=""> -- Typ -- </option>
+                <option value="PUPIL" selected="selected">Schüler</option>
+                <option value="PUPIL">Lehrer</option>
+                <option value="PUPIL">Sonstige</option>
+            </select>
+            <select class="span3" name="type">
+               <option value="0"> -- Anzahl ausleihbarer Bücher -- </option>
+                <option value="1" selected="selected">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+            </select>
+         </div>
+         <div class="controls controls-row">
+            <select class="span3" name="schoolClass">
+               <option value="0"> -- Klasse  -- </option>
+                <option value="1" selected="selected">keine</option>
+                <option value="2">1 a</option>
+                <option value="3">1 b</option>
+                <option value="5">2 a</option>
+                <option value="10">2 b</option>
+                <option value="20">3 a</option>
+                <option value="20">3 b</option>
+                <option value="20">4 a</option>
+                <option value="20">4 b</option>
+            </select>
+            <input class="span3" type="text" placeholder="Barcode">
+         </div>
+         <hr/>
+         <div class="controls controls-row">
+            <div class="offset2 span4">
+               <button class="btn btn-primary">Ändern</button>
+               <button class="btn btn-primary">Anlegen</button>
+               <button class="btn btn-danger">Löschen</button>
+            </div>
+         </div>
+      </form>
+   </div>
+
 
    <div class="row-fluid">
       <div class="span12">

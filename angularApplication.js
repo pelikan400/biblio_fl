@@ -8,7 +8,7 @@ define( [ './controllers/books_controller', './controllers/patrons_controller', 
    return {
       importInto: function( angularHostModule ) {
          console.log( ixoidDatabase );
-         [ booksController, patronsController, bookLoansController, ixoidDatabase ].forEach( function( module ) {
+         [ patronsController, bookLoansController, ixoidDatabase ].forEach( function( module ) {
             module.registerExports( angularHostModule );
          } );
 

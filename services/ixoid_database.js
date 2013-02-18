@@ -144,7 +144,7 @@ define( [ "angular", "underscore" ], function( angular, _ ) {
    var patrons = dummyData.patrons;
    var circulations = [];
    
-   var service = [ "$q", "$timeout", function( q, timeout ) {
+   var service = [ "$q", "$timeout", "$resource", function( q, timeout, $resource ) {
       
       return {
          getBooks : function() {

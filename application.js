@@ -30,8 +30,6 @@ require.config( {
 
 require( [ "jquery", "twitter-bootstrap", "underscore", "angular",  "angular-resource", "angularApplication" ],
    function( jquery, bootstrap, _, angular, angularResource, angularApplication ) {
-       console.log( "angular-resource loaded ? " );
-       console.log( angularResource );
        var angularModule = angular.module( "bibliothek.ixoid.de", [ 'ngResource' ] );
        angularApplication.importInto( angularModule );
        angular.bootstrap( document, [ 'bibliothek.ixoid.de' ] );

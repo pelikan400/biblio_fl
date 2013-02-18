@@ -7,13 +7,12 @@ define( [ './controllers/books_controller', './controllers/patrons_controller', 
 
    return {
       importInto: function( angularHostModule ) {
-         console.log( ixoidDatabase );
-         [ patronsController, bookLoansController, ixoidDatabase ].forEach( function( module ) {
+           [ booksController, patronsController, bookLoansController, ixoidDatabase ].forEach( function( module ) {
+            console.log( module );
             module.registerExports( angularHostModule );
          } );
 
       }
    };
-
 } );
 

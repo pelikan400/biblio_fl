@@ -144,12 +144,77 @@ define( [ "angular", "underscore" ], function( angular, _ ) {
    var patrons = dummyData.patrons;
    var circulations = [];
    
-    var service = [ "$q", "$timeout", "$resource", function( q, timeout, $resource ) {
-      
+   var couchDBServerUrl = "http://www2.edba.de/couchdb/biblio-fl";
+   var service = [ "$q", "$timeout", "$http", "$resource", function( q, timeout, $http, $resource ) {
+       function CouchDB( databaseUrl) {
+         this.databaseUrl = databaseUrl;
+       }
+
+       CouchDB.prototype.getAllDocs = function() {
+         var allDocsUrl = this.databaseUrl + "/_all_docs";
+         return $http( { method: "GET", url: allDocsUrl } );
+       };
+       
+       CouchDB.prototype.getView = function() {
+         var allDocsUrl = this.databaseUrl + "/_all_docs";
+         return $http( { method: "GET", url: allDocsUrl } );
+       };
+       
+       CouchDB.prototype.createDoc = function( doc ) {
+         var url = this.databaseUrl;
+         return $http( { method: "POST", url: url } )
+         .then( function( response ) {
+             // complete the object with received data
+             return response.data;
+         });
+       };
+
+       CouchDB.prototype.readDoc = function( doc ) {
+         var url = this.databaseUrl + "/" + id;
+         return $http( { method: "GET", url: url } );
+       };
+
+       CouchDB.prototype.updateDoc = function( doc ) {
+         var url = this.databaseUrl + ;
+         return $http( { method: "PUT", url: url } );
+       };
+
+       CouchDB.prototype.deleteDoc = function( doc ) {
+         var url = this.databaseUrl;
+         return $http( { method: "POST", url: url } );
+       };
+
+      var testPostBook = function() {
+        restGet( couchDBServerUrl );
+          // var CouchDBResource = $resource( couchDBServerUrl );
+          // var book = new CouchDBResource();
+          // book.title = "Mister and Missis X";
+          // var x = book.$save( function( book ) {
+          //    console.log( "Book id is: " + book.id );
+          // } );
+          // console.log( "Saved the book" );
+          // console.log( x );
+          // console.log( book );
+          // // get all books 
+          // var books = CouchDBResource.query();
+          // console.log( "Get all books" );
+          // console.log( books );
+
+          // TODO: 
+          // - only one client may access the CouchDB 
+          // - read all patrons and books 
+          // - hold data in localstorage
+          // - synchronize data automagically every 5 minutes 
+          // - synchronize on logout 
+          // - mark every data as dirty on change
+          // - save only marked data entry and clear the mark
+          // - use SimpleDB instead of CouchDB
+          // - host entire App in S3 or Cloud Storage
+          // - minimize and obfuscate the javascript code 
+          // - what about authentication and security (read-only vs. read-write)
+      };
+            
       return {
-          testPostBook : function() {
-              var BookResource = $resource( "http://mx0.e11e.de:5294/biblio_fl/books" );
-          },
          getBooks : function() {
             var deferred = q.defer();
             timeout( function() {
@@ -188,6 +253,7 @@ define( [ "angular", "underscore" ], function( angular, _ ) {
             return deferred.promise;
          },
          getPatronByBarcode : function( patronBarcode ) {
+            testPostBook();
             var deferred = q.defer();
             timeout( function() {
                console.log( "get patron by barcode" );

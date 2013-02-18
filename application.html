@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<div class="container-fluid"  data-ng-controller="BookLoansController">
+<div class="container"  data-ng-controller="BookLoansController">
    <div class="navbar">
      <div class="navbar-inner">
        <a class="brand" href="#">Biblio FL</a>
@@ -27,7 +27,7 @@
      </div>
    </div>
 
-   <div class="row-fluid">
+   <div class="row">
       <div class="span5">
          <form ng-submit="parseGeneralInput()">
             <input class="input-xlarge" type="text" ng-model="generalInputText">
@@ -38,7 +38,7 @@
       </div>
    </div>
 
-   <div class="row-fluid">
+   <div class="row">
       <div class="span5">
          <div ng-repeat="book in issuedBooks"> 
             <div><p>
@@ -55,13 +55,13 @@
 
    <div ng-controller="PatronsController">
       <form ng-submit="editPatron()">
-         <div class="row-fluid">
+         <div class="row">
             <h3>Neue Person</h3>
          </div>
          <hr/>
          <div class="controls controls-row">
-            <input class="span3" type="text" name="patron.firstName" placeholder="Vorname">
-            <input class="span3" type="text" name="editablePatron.lastName" placeholder="Nachname">
+            <input class="span3" type="text" ng-model="patron.firstName" placeholder="Vorname">
+            <input class="span3" type="text" ng-model="editablePatron.lastName" placeholder="Nachname">
          </div>
          <div class="controls controls-row">
             <select class="span3" name="type">
@@ -107,7 +107,7 @@
    </div>
 
 
-   <div class="row-fluid">
+   <div class="row">
       <div class="span12">
          <div data-ng-view></div>
       </div>

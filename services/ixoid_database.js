@@ -144,9 +144,12 @@ define( [ "angular", "underscore" ], function( angular, _ ) {
    var patrons = dummyData.patrons;
    var circulations = [];
    
-   var service = [ "$q", "$timeout", function( q, timeout ) {
+    var service = [ "$q", "$timeout", "$resource", function( q, timeout, $resource ) {
       
       return {
+          testPostBook : function() {
+              var BookResource = $resource( "http://mx0.e11e.de:5294/biblio_fl/books" );
+          },
          getBooks : function() {
             var deferred = q.defer();
             timeout( function() {

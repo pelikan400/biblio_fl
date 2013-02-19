@@ -152,40 +152,61 @@ define( [ "angular", "underscore" ], function( angular, _ ) {
 
        CouchDB.prototype.getAllDocs = function() {
          var allDocsUrl = this.databaseUrl + "/_all_docs";
-         return $http( { method: "GET", url: allDocsUrl } );
+         return $http( { method: "GET", url: allDocsUrl } )
+         .then( function( response ) {
+             return response.data;
+         });
        };
        
        CouchDB.prototype.getView = function() {
          var allDocsUrl = this.databaseUrl + "/_all_docs";
-         return $http( { method: "GET", url: allDocsUrl } );
+         return $http( { method: "GET", url: allDocsUrl } )
+         .then( function( response ) {
+             return response.data;
+         });
        };
        
        CouchDB.prototype.createDoc = function( doc ) {
          var url = this.databaseUrl;
          return $http( { method: "POST", url: url } )
          .then( function( response ) {
-             // complete the object with received data
+             _.extend( doc, response.data );
              return response.data;
          });
        };
 
        CouchDB.prototype.readDoc = function( doc ) {
          var url = this.databaseUrl + "/" + id;
-         return $http( { method: "GET", url: url } );
+         return $http( { method: "GET", url: url } )
+         .then( function( response ) {
+             _.extend( doc, response.data );
+             return response.data;
+         });
        };
 
        CouchDB.prototype.updateDoc = function( doc ) {
-         var url = this.databaseUrl + ;
-         return $http( { method: "PUT", url: url } );
+         var url = this.databaseUrl + "/" + id;
+         return $http( { method: "PUT", url: url } )
+         .then( function( response ) {
+             _.extend( doc, response.data );
+             return response.data;
+         });
        };
 
        CouchDB.prototype.deleteDoc = function( doc ) {
-         var url = this.databaseUrl;
-         return $http( { method: "POST", url: url } );
+         var url = this.databaseUrl + "/" + id;
+         return $http( { method: "DELETE", url: url } );
        };
 
       var testPostBook = function() {
-        restGet( couchDBServerUrl );
+        var couchDB = new CouchDB( couchDBServerUrl );
+
+        var allData = couchDB.getAllDocs()
+        .then( function( data ) { 
+            console.log( "Got all documents from couchDB: " );
+            console.log( data );
+        });
+        // restGet( couchDBServerUrl );
           // var CouchDBResource = $resource( couchDBServerUrl );
           // var book = new CouchDBResource();
           // book.title = "Mister and Missis X";

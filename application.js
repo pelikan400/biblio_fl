@@ -11,7 +11,9 @@ require.config( {
       'angular-resource': 'lib/angular/angular-resource',
       'jquery': 'lib/jquery/jquery-1.8.1.min',
       'underscore': 'lib/underscore/underscore-min',
-      'twitter-bootstrap': 'lib/bootstrap/js/bootstrap'
+      'twitter-bootstrap': 'lib/bootstrap/js/bootstrap',
+      'sha256' : 'lib/crypto/rollups/sha256',
+      'hmac-sha256' : 'lib/crypto/rollups/hmac-sha256'
    },
    
    shim: {
@@ -22,6 +24,13 @@ require.config( {
       },
       'underscore': {
          exports: '_'
+      },
+      'hmac-sha256': {
+         exports: 'CryptoJS'
+      },
+      'sha256': {
+         deps: [ 'hmac-sha256' ],
+         exports: 'CryptoJS'
       },
       'twitter-bootstrap': ['jquery']
   }
@@ -35,16 +44,3 @@ require( [ "jquery", "twitter-bootstrap", "underscore", "angular",  "angular-res
        angular.bootstrap( document, [ 'bibliothek.ixoid.de' ] );
    } 
 );
-
-
-// angular.module('Twitter', ['ngResource']);
-// 
-// function TwitterCtrl($scope, $resource) {
-//     $scope.twitter = $resource('http://search.twitter.com/:action',
-//         {action:'search.json', q:'angularjs', callback:'JSON_CALLBACK'},
-//         {get:{method:'JSONP'}});
-// 
-//     $scope.doSearch = function () {
-//         $scope.twitterResult = $scope.twitter.get({q:$scope.searchTerm});
-//     };
-// }

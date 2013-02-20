@@ -7,8 +7,4 @@ class HelloWorld( object ):
 
 print "CherryPy config: %s"  % cherrypy.config
 
-cherrypy.config[ "/" ] = {
-   
-}
-
-cherrypy.quickstart( HelloWorld() )
+cherrypy.quickstart( HelloWorld(), "", open( "cherrypy.config", "r" ) )

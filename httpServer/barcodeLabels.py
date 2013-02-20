@@ -403,7 +403,7 @@ class Barcode128( Barcode ) :
     def encode( self, inputText ) :
         if self.checkIfOnlyNumbers( inputText ) :
             # text = inputText
-            text = self.paddWithZeroAndComputeChecksum( inputText )
+            text = self.paddWithZeroAndComputeChecksum( inputText, minimumPadding = 4 )
             text, symbols = self.convertInputNumbersToSymbols( text )
             return text, self.internalEncode( symbols, 105 )
         else:
@@ -490,9 +490,9 @@ class Label( object ) :
         self.ctx.set_source_rgb( 0, 0, 0 )
         self.barcodeRendererList = []
         self.barcodeRendererList.append( Barcode128() )
-        self.barcodeRendererList.append( BarcodeITF() )
+        # self.barcodeRendererList.append( BarcodeITF() )
         # self.barcodeRendererList.append( Barcode39() )
-        self.barcodeRendererList.append( BarcodeEAN() )
+        # self.barcodeRendererList.append( BarcodeEAN() )
         self.barcodeRendererCounter = 0
 
     def showText( self, x, y, text, textSize = 10, align = "center" ) :
@@ -544,8 +544,8 @@ class Label( object ) :
         text, encoding = barcodeRenderer.encode( text )
         symbolExtent = self.symbolExtent( encoding )
         self.drawSymbolEncoding( centerX - symbolExtent / 2, centerY - self.barHeight / 2, encoding )
-        textY = centerY + self.barHeight / 2 + cmToPoints( 0.4 )
-        textEndX = self.showText( centerX, textY, text )
+        textY = centerY + self.barHeight / 2 + cmToPoints( 0.5 )
+        textEndX = self.showText( centerX, textY, text, textSize = 12 )
         if labelNote :
             self.showText( textEndX + cmToPoints( 0.4 ), textY, labelNote, textSize = 5, align = "left" )
 

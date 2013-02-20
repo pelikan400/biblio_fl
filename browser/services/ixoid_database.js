@@ -1,6 +1,6 @@
 "use strict";
    
-define( [ "angular", "underscore", "./dynamoDB", "./dummyData" ], function( angular, _, db, dummyData ) {
+define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angular, _, dbm, dummyData ) {
    var books = dummyData.books;
    var patrons = dummyData.patrons;
    var circulations = [];
@@ -13,6 +13,7 @@ define( [ "angular", "underscore", "./dynamoDB", "./dummyData" ], function( angu
    var service = [ "$q", "$timeout", "$http", "$resource", function( q, timeout, $http, $resource ) {
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      
       var testPostBook = function() {
         var db = db.db( $http,dynamoDBUrl,dynamoDBPSecretKey, dynamoDBKeyId );
 
@@ -56,6 +57,27 @@ define( [ "angular", "underscore", "./dynamoDB", "./dummyData" ], function( angu
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
       return {
+         testRestGet : function() {
+            console.log( "dbm: " );
+            console.log( dbm );
+            var db = dbm.db( $http, "localhost:8080/db" );
+            console.log( "db: " );
+            console.log( db );
+            db.getDocument( "barcode-123456" )
+            .then( function( doc ) { 
+               console.log( "Hooray, we got an document after GET" );
+               console.log( doc );
+            } );
+            
+         },
+         testRestPut: function() {
+            var db = dbm.db( $http, "localhost:8080/db" );
+            db.putDocument( "barcode-123456", { title: "Hello captain Jack" } )
+            .then( function( doc ) { 
+               console.log( "Hooray, we got an document after PUT" );
+               console.log( doc );
+            } );
+         },
          getBooks : function() {
             var deferred = q.defer();
             timeout( function() {

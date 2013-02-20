@@ -1,5 +1,8 @@
-import cairo
 from optparse import OptionParser
+try:
+   import cairo
+except:
+   pass
 
 def cmToPoints( x ) :
     return x * 72 / 2.54

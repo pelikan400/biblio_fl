@@ -32,6 +32,18 @@ define( function() {
            } );
         };
         
+        
+        $scope.testRestGet = function() {
+           console.log( "testRestGet" );
+           db.testRestGet();
+        };
+        
+        $scope.testRestPut = function() {
+           console.log( "testRestPut" );
+           db.testRestPut();
+        };
+        
+        
         // TODO: put focus on generalInputText ?
         $scope.parseGeneralInput = function () {
             console.log( "Input is: '" + $scope.generalInputText + "'" );

@@ -1,7 +1,7 @@
 import cherrypy
 import os
 from httpServer import barcodeLabels
-from httpServer.restDatabase import RestDbPage
+from httpServer.restDatabase import Resource
 import StringIO 
 from UserDict import DictMixin
 
@@ -28,6 +28,6 @@ class RootPage( object ):
         cherrypy.response.headers[ "Content-Type" ] = "application/pdf"
         return outputFile.getvalue()
 
-    db = RestDbPage()
+    db = Resource()
 
     # barcode._cp_config = {'response.stream': True}

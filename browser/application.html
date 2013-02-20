@@ -7,11 +7,6 @@
       <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
       <link rel="stylesheet" href="application.css">
     
-      <style type="text/css">
-         [ng\:cloak], [data-ng-cloak], [ng-cloak], .ng-cloak {
-            display: none;
-         }
-      </style>
 </head>
 <body>
 
@@ -53,6 +48,13 @@
          </div>
       </div>
    </div>
+   
+   <form>
+   <div class="row">
+      <button class="btn btn-primary" ng-click="testRestGet()">Rest GET</button>
+      <button class="btn btn-primary" ng-click="testRestPut()">Rest PUT</button>
+   </div>
+   </form>
 
    <div ng-controller="PatronsController">
       <form ng-submit="editPatron()">

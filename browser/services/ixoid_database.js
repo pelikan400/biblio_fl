@@ -1,58 +1,66 @@
 "use strict";
    
-define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angular, _, dbm, dummyData ) {
-   var books = dummyData.books;
-   var patrons = dummyData.patrons;
+define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
+   var dummyData = null;
+   var books = null;
+   var patrons = null;
    var circulations = [];
 
-   var dynamoDBUrl = "";
-   var dynamoDBKeyId = "";
-    var  dynamoDBPSecretKey = "";
-   
-   var couchDBServerUrl = "http://www2.edba.de/couchdb/bibliofl";
    var service = [ "$q", "$timeout", "$http", "$resource", function( q, timeout, $http, $resource ) {
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      
-      var testPostBook = function() {
-        var db = db.db( $http,dynamoDBUrl,dynamoDBPSecretKey, dynamoDBKeyId );
+      var dumpDummyDataIntoDatabase = function() {
+         var db = dbm.db( $http, "/db" );
+         var patronPromises = [];
+         patrons.forEach( function( patron ) {
+            patron.id = "patron-barcode-" + patron.barcode;
+            patron.schoolClass = "1a";
+            patron.docType = "PATRON";
+            patron.maximumIssues = 1;
+            patronPromises.push( db.putDocument( patron.id, patron )
+               .then( function( item ) {
+                  console.log( "PUT succeeded" );
+                  console.log( item );
+               }) 
+            );
+         });
+         q.all( patronPromises ) 
+         .then( function( result ) {
+            console.log( "All PUT's succeeded" );
+         });
 
-        // var couchDB = new CouchDB( couchDBServerUrl );
-        // 
-        // var allData = couchDB.getAllDocs()
-        // .then( function( data ) { 
-        //     console.log( "Got all documents from couchDB: " );
-        //     console.log( data );
-        // });
-
-        // restGet( couchDBServerUrl );
-          // var CouchDBResource = $resource( couchDBServerUrl );
-          // var book = new CouchDBResource();
-          // book.title = "Mister and Missis X";
-          // var x = book.$save( function( book ) {
-          //    console.log( "Book id is: " + book.id );
-          // } );
-          // console.log( "Saved the book" );
-          // console.log( x );
-          // console.log( book );
-          // // get all books 
-          // var books = CouchDBResource.query();
-          // console.log( "Get all books" );
-          // console.log( books );
-
-          // TODO: 
-          // - only one client may access the CouchDB 
-          // - read all patrons and books 
-          // - hold data in localstorage
-          // - synchronize data automagically every 5 minutes 
-          // - synchronize on logout 
-          // - mark every data as dirty on change
-          // - save only marked data entry and clear the mark
-          // - use SimpleDB instead of CouchDB
-          // - host entire App in S3 or Cloud Storage
-          // - minimize and obfuscate the javascript code 
-          // - what about authentication and security (read-only vs. read-write)
+         var bookPromises = [];
+         books.forEach( function( book ) {
+            book.id = "book-barcode-" + book.barcode;
+            book.docType = "BOOK";
+            bookPromises.push( db.putDocument( book.id, book )
+               .then( function( item ) {
+                  console.log( "PUT succeeded" );
+                  console.log( item );
+               }) 
+            );
+         });
+         q.all( bookPromises ) 
+         .then( function( result ) {
+            console.log( "All PUT's succeeded" );
+         });
       };
+      
+      
+       // TODO: 
+       // - only one client may access the CouchDB
+       // - implement conditional PUT (use ETag)
+       // - every PUT will also save meta infos 
+       // - read all patrons and books 
+       // - hold data in localstorage
+       // - synchronize data automagically every 5 minutes 
+       // - synchronize on logout 
+       // - mark every data as dirty on change
+       // - save only marked data entry and clear the mark
+       // - use SimpleDB instead of CouchDB
+       // - host entire App in S3 or Cloud Storage
+       // - minimize and obfuscate the javascript code 
+       // - what about authentication and security (read-only vs. read-write)
             
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -116,31 +124,37 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             return deferred.promise;
          },
          getPatronByBarcode : function( patronBarcode ) {
-            testPostBook();
-            var deferred = q.defer();
-            timeout( function() {
-               console.log( "get patron by barcode" );
-               patrons.forEach( function( item, index ) { 
-                  if( item.barcode == patronBarcode ) {
-                     console.log( "found patron: " + patronBarcode );
-                     console.log( item );
-                     deferred.resolve( item );
-                  }
-               } );
+            var patronKey = "patron-barcode-" + patronBarcode;
+            var db = dbm.db( $http, "/db" );
+            return db.getDocument( patronKey )
+            .then( function( doc ) { 
+               console.log( doc );
+               return doc;
             } );
-            return deferred.promise;
          },
          getIssuedBooksByPatron: function( patron ) {
             var deferred = q.defer();
-            timeout( function() {
-               var issuedBooks = [];
-               books.forEach( function( book ) {
-                  if( book.issuedBy == patron ){
-                     issuedBooks.push( book );
-                  }
+            var issuedBooks = [];
+            if( patron && patron.issuedBooks ) {
+               var db = dbm.db( $http, "/db" );
+               allBooksPromises = [];
+               patron.issuedBooks.forEach( function( bookKey ) {
+                  allBooksPromises.push(
+                     db.getDocument( bookKey ) 
+                     .then( function( doc ) {
+                        issuedBooks.push( doc );
+                        return doc;
+                     })
+                  );
                } );
+               q.all( allBooksPromises ) 
+               .then( function() {
+                  deferred.resolve( issuedBooks );
+               });
+            }
+            else {
                deferred.resolve( issuedBooks );
-            } );
+            }
             return deferred.promise;
          },
          getBookIssue : function( book ) {

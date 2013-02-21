@@ -47,7 +47,7 @@ define( function() {
              //    "type" : "PUPIL"
              // },
           ],
-          "books" : [
+          books : [
              { 
                 "title" : "Der Grüffelo", 
                 "publisher" : "Beltz & Gelberg",
@@ -115,7 +115,7 @@ define( function() {
                 "language" : "german",
                 "isbn" : "9783843200059",
                 "author" : "Jeff Kinney",
-                "barcode" : "",
+                "barcode" : "123466",
                 "signature" : ""
              },
              { 

@@ -49,13 +49,7 @@ class Barcode( object ) :
         return x
 
     def paddWithZeroAndComputeChecksum( self, text, minimumPadding = 6 ) :
-        lenText = len( text )
-        newText = ""
-        minTextLenWithoutChecksum = minimumPadding - 1
-        if lenText <=  minTextLenWithoutChecksum :
-            for i in range( 0, minTextLenWithoutChecksum- lenText ) :
-                newText += "0" 
-        newText += text
+        newText = text.zfill( minimumPadding - 1 )
         newText += "%s" % self.computeEanChecksum( newText )
         return newText
 
@@ -405,8 +399,8 @@ class Barcode128( Barcode ) :
 
     def encode( self, inputText ) :
         if self.checkIfOnlyNumbers( inputText ) :
-            # text = inputText
-            text = self.paddWithZeroAndComputeChecksum( inputText, minimumPadding = 4 )
+            text = inputText
+            # text = self.paddWithZeroAndComputeChecksum( inputText, minimumPadding = 4 )
             text, symbols = self.convertInputNumbersToSymbols( text )
             return text, self.internalEncode( symbols, 105 )
         else:
@@ -631,7 +625,7 @@ class Label( object ) :
     def drawPage( self ):
         labelsTextList = None
         if self.options.labelsConcaternated :
-            labelsTextList = self.options.labelsConcaternated.split( ";" )
+            labelsTextList = self.options.labelsConcaternated.split( "," )
             # print "size of labelsTextList: %s" % len( labelsTextList )
 
         if labelsTextList and len( labelsTextList ) != 0 :

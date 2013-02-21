@@ -60,7 +60,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          testRestGet : function() {
             console.log( "dbm: " );
             console.log( dbm );
-            var db = dbm.db( $http, "localhost:8080/db" );
+            var db = dbm.db( $http, "/db" );
             console.log( "db: " );
             console.log( db );
             db.getDocument( "barcode-123456" )
@@ -71,7 +71,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             
          },
          testRestPut: function() {
-            var db = dbm.db( $http, "localhost:8080/db" );
+            var db = dbm.db( $http, "/db" );
             db.putDocument( "barcode-123456", { title: "Hello captain Jack" } )
             .then( function( doc ) { 
                console.log( "Hooray, we got an document after PUT" );

@@ -19,10 +19,12 @@ define( [ "underscore" ], function( _ ) {
    
    RestDB.prototype.putDocument = function( id, data ) {
       var url = this.databaseUrl + "/" + id;
-      dataAsJson = JSON.stringify( data );
-      return this.$http( { method: "GET", url: url, body: dataAsJson } )
+      var dataAsJson = JSON.stringify( data );
+      return this.$http( { method: "PUT", url: url, data: data } )
       .then( function( response ) {
-          return JSON.parse( response.data );
+          console.log( "PUT response is: " );
+          console.log( response.data );
+          return response.data;
       });
    };
    

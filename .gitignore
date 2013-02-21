@@ -4,6 +4,9 @@
 # C extensions
 *.so
 
+# BerkeleyDB
+*.db
+
 # Packages
 *.egg
 *.egg-info

@@ -64,28 +64,9 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
             
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      var db = dbm.db( $http, "/db" );
+      
       return {
-         testRestGet : function() {
-            console.log( "dbm: " );
-            console.log( dbm );
-            var db = dbm.db( $http, "/db" );
-            console.log( "db: " );
-            console.log( db );
-            db.getDocument( "barcode-123456" )
-            .then( function( doc ) { 
-               console.log( "Hooray, we got an document after GET" );
-               console.log( doc );
-            } );
-            
-         },
-         testRestPut: function() {
-            var db = dbm.db( $http, "/db" );
-            db.putDocument( "barcode-123456", { title: "Hello captain Jack" } )
-            .then( function( doc ) { 
-               console.log( "Hooray, we got an document after PUT" );
-               console.log( doc );
-            } );
-         },
          getBooks : function() {
             var deferred = q.defer();
             timeout( function() {
@@ -101,20 +82,13 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
             return deferred.promise;
             
          },
-         getBookByBarcode : function( barcode ) {
-            var deferred = q.defer();
-            timeout( function() {
-               var found = false;
-               books.forEach( function( book ) {
-                  if( book.barcode == barcode ) {
-                     deferred.resolve( book );
-                  }
-               } );
-               if( !found ) {
-                  deferred.resolve( null );
-               }
+         getBookByBarcode : function( bookBarcode ) {
+            var bookKey = "book-barcode-" + bookBarcode;
+            return db.getDocument( bookKey )
+            .then( function( doc ) { 
+               console.log( doc );
+               return doc;
             } );
-            return deferred.promise;
          },
          getPatrons : function() {  
             var deferred = q.defer();
@@ -125,7 +99,6 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
          },
          getPatronByBarcode : function( patronBarcode ) {
             var patronKey = "patron-barcode-" + patronBarcode;
-            var db = dbm.db( $http, "/db" );
             return db.getDocument( patronKey )
             .then( function( doc ) { 
                console.log( doc );
@@ -136,7 +109,6 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
             var deferred = q.defer();
             var issuedBooks = [];
             if( patron && patron.issuedBooks ) {
-               var db = dbm.db( $http, "/db" );
                allBooksPromises = [];
                patron.issuedBooks.forEach( function( bookKey ) {
                   allBooksPromises.push(

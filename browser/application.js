@@ -7,7 +7,7 @@ require.config( {
    ],
 
    paths: {
-      'angular': 'lib/angular/angular',
+      'angular': 'lib/angular/angular.min',
       'angular-resource': 'lib/angular/angular-resource',
       'jquery': 'lib/jquery/jquery-1.8.1.min',
       'underscore': 'lib/underscore/underscore-min',

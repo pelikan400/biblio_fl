@@ -49,67 +49,6 @@
       </div>
    </div>
    
-   <form>
-   <div class="row">
-      <button class="btn btn-primary" ng-click="testRestGet()">Rest GET</button>
-      <button class="btn btn-primary" ng-click="testRestPut()">Rest PUT</button>
-   </div>
-   </form>
-
-   <div ng-controller="PatronsController">
-      <form ng-submit="editPatron()">
-         <div class="row">
-            <h3>Neue Person</h3>
-         </div>
-         <hr/>
-         <div class="controls controls-row">
-            <input class="span3" type="text" ng-model="editablePatron.firstName" placeholder="Vorname">
-            <input class="span3" type="text" ng-model="editablePatron.lastName" placeholder="Nachname">
-         </div>
-         <div class="controls controls-row">
-            <select class="span3" ng-model="type">
-               <option value=""> -- Typ -- </option>
-                <option value="PUPIL" selected="selected">Schüler</option>
-                <option value="PUPIL">Lehrer</option>
-                <option value="PUPIL">Sonstige</option>
-            </select>
-            <select class="span3" ng-model="maximumIssues">
-               <option value="0"> -- Anzahl ausleihbarer Bücher -- </option>
-                <option value="1" selected="selected">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-            </select>
-         </div>
-         <div class="controls controls-row">
-            <select class="span3" name="schoolClass">
-               <option value="0"> -- Klasse  -- </option>
-                <option value="1" selected="selected">keine</option>
-                <option value="2">1 a</option>
-                <option value="3">1 b</option>
-                <option value="5">2 a</option>
-                <option value="10">2 b</option>
-                <option value="20">3 a</option>
-                <option value="20">3 b</option>
-                <option value="20">4 a</option>
-                <option value="20">4 b</option>
-            </select>
-            <input class="span3" type="text" placeholder="Barcode">
-         </div>
-         <hr/>
-         <div class="controls controls-row">
-            <div class="offset2 span4">
-               <button class="btn btn-primary">Ändern</button>
-               <button class="btn btn-primary">Anlegen</button>
-               <button class="btn btn-danger">Löschen</button>
-            </div>
-         </div>
-      </form>
-   </div>
-
-
    <div class="row">
       <div class="span12">
          <div data-ng-view></div>

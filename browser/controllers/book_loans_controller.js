@@ -23,7 +23,7 @@ define( function() {
         console.log( "BookLoansController initialized." );
 
         var getIssuedBooks = function( patron ) {
-           db.getIssuedBooksByPatron( patron )
+           return db.getIssuedBooksByPatron( patron )
            .then( function( issuedBooks ) {
               console.log( "issuedBooks are:" );
               console.log( issuedBooks );
@@ -31,7 +31,6 @@ define( function() {
               return issuedBooks;
            } );
         };
-        
         
         $scope.testRestGet = function() {
            console.log( "testRestGet" );
@@ -42,7 +41,6 @@ define( function() {
            console.log( "testRestPut" );
            db.testRestPut();
         };
-        
         
         // TODO: put focus on generalInputText ?
         $scope.parseGeneralInput = function () {
@@ -58,6 +56,7 @@ define( function() {
                        return patron;
                    });
                } else {
+                 // save book AND patron on every status change of the book 
                    console.log( "Book ID detected: " + text );
                    db.getBookByBarcode( text )
                    .then( function( book ) {
@@ -66,6 +65,7 @@ define( function() {
                         if( !book.issuedBy ) {
                            book.issuedBy = $scope.patron.id;
                            book.issuedStatus = "ISSUED";
+                           getIssuedBooks( $scope.patron );
                         }
                         else if( book.issuedBy == $scope.patron.id ) {
                            if( book.issuedStatus == "RETURNED" ) {
@@ -73,10 +73,12 @@ define( function() {
                            } else {
                               book.issuedStatus = "RETURNED";
                            }
+                           getIssuedBooks( $scope.patron );
                         } else {
                            if( book.issuedStatus == "RETURNED" ) {
                               book.issuedStatus = "ISSUED";
                               book.issuedBy = $scope.patron.id;
+                              getIssuedBooks( $scope.patron );
                            }
                            else {
                               // change the patron and set to RETURNED
@@ -88,7 +90,6 @@ define( function() {
                               });
                            }
                         }
-                        getIssuedBooks( $scope.patron );
                      }
                    });
                };

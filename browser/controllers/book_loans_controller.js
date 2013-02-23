@@ -32,15 +32,29 @@ define( function() {
            } );
         };
         
-        $scope.testRestGet = function() {
-           console.log( "testRestGet" );
-           db.testRestGet();
+        
+        var patronAddBook = function( patron, bookId ) {
+           if( !patron.books ) {
+              patron.books = {};
+           }
+           patron.books[ bookId ] = bookId;
+        };
+
+        
+        var patronRemoveBook = function( patron, bookId ) {
+           if( patronHasBook( patron, bookId ) ) {
+              delete patron.books[ bookId ];
+           }
+        };
+
+        
+        var patronHasBook = function( patron, bookId ) {
+           if( !patron.books ) {
+              return false;
+           }
+           return bookId in patron.books;
         };
         
-        $scope.testRestPut = function() {
-           console.log( "testRestPut" );
-           db.testRestPut();
-        };
         
         // TODO: put focus on generalInputText ?
         $scope.parseGeneralInput = function () {
@@ -62,6 +76,7 @@ define( function() {
                    .then( function( book ) {
                      if( book ) {
                         console.log( "found book" );
+                        console.log( book );
                         if( !book.issuedBy ) {
                            book.issuedBy = $scope.patron.id;
                            book.issuedStatus = "ISSUED";

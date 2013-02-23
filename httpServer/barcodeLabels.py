@@ -399,8 +399,8 @@ class Barcode128( Barcode ) :
 
     def encode( self, inputText ) :
         if self.checkIfOnlyNumbers( inputText ) :
-            text = inputText
-            # text = self.paddWithZeroAndComputeChecksum( inputText, minimumPadding = 4 )
+            # text = inputText
+            text = self.paddWithZeroAndComputeChecksum( inputText, minimumPadding = 4 )
             text, symbols = self.convertInputNumbersToSymbols( text )
             return text, self.internalEncode( symbols, 105 )
         else:

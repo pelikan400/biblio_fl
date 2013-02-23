@@ -9,8 +9,16 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
    var service = [ "$q", "$timeout", "$http", "$resource", function( q, timeout, $http, $resource ) {
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      
+      // API proposal: 
+      // createBook, updateBook, readBook, deleteBook
+      // createBookBarcode, getBookBarcode, deleteBookBarcode
+      // create, update, read, erase (delete is reserved)
+      // book, 
+      // document based
+      var db = dbm.db( $http, "/db" );
+      
       var dumpDummyDataIntoDatabase = function() {
-         var db = dbm.db( $http, "/db" );
          var patronPromises = [];
          patrons.forEach( function( patron ) {
             patron.id = "patron-barcode-" + patron.barcode;
@@ -64,105 +72,173 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
             
        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      var db = dbm.db( $http, "/db" );
+      function randomUUID() {
+         var s = [], itoh = '0123456789ABCDEF';
+        
+         // Make array of random hex digits. The UUID only has 32 digits in it, but we
+         // allocate an extra items to make room for the '-'s we'll be inserting.
+         for (var i = 0; i <36; i++) s[i] = Math.floor(Math.random()*0x10);
+        
+         // Conform to RFC-4122, section 4.4
+         s[14] = 4;  // Set 4 high bits of time_high field to version
+         s[19] = (s[19] & 0x3) | 0x8;  // Specify 2 high bits of clock sequence
+        
+         // Convert to hex chars
+         for (var i = 0; i <36; i++) s[i] = itoh[s[i]];
+        
+         // Insert '-'s
+         s[8] = s[13] = s[18] = s[23] = '-';
+        
+         return s.join('');
+      }
+      
+      
+      function Document( id, generateUuid )
+      {
+         this.id = id;
+         if( generateUuid ) {
+            this.id += "-uuid-" + randomUUID(); 
+         }
+      }
+      
+      
+      Document.prototype.get = function() {
+         // TODO: where do we hold the meta informations, like etag
+         self = this;
+         return db.getDocument( self.id )
+         .then( function( doc ) { 
+            if( doc ) {
+               console.log( doc );
+               _.expand( self, doc );
+               return self;
+            } else {
+               return null;
+            }
+         } );
+      };
+      
+      Document.prototype.put = function() {
+         self = this;
+         return db.putDocument( self.id, self )
+         .then( function( doc ) { 
+            if( doc ) {
+               console.log( doc );
+               _.expand( self, doc );
+               return self;
+            } else {
+               return null;
+            }
+         } );
+      };
+      
+      
+      var encodePatronIdFromBarcode = function( barcode ) {
+         return "patron-barcode-" + barcode;
+      };
+
+      
+      var encodeBookIdFromBarcode = function( barcode ) {
+         return "book-barcode-" + barcode;
+      };
+      
+      
+      var getDocument = function( id ) {
+         return (new Document( id )).get();
+      };
+      
+      var scanDocuments = function( idPrefix, searchText ) {
+         var deferred = q.defer();
+         db.scanDocuments( idPrefix, searchText )
+         .then( function( docArray ) {
+            if( docArray ) {
+               var docs = [];
+               docArray.forEach( function( item ) {
+                  var document = new Document( item.id );
+                  _.expand( document, item );
+                  docs.push( document );
+               });
+               deferred.resolve( docs );
+            } else {
+               deferred.resolve( null );
+            } 
+         });
+         return deferred.promise;
+      };
+
+      var getAllDocuments = function( idPrefix ) {
+         var deferred = q.defer();
+         db.scanDocuments( idPrefix, searchText )
+         .then( function( docArray ) {
+            if( docArray ) {
+               var docs = [];
+               docArray.forEach( function( item ) {
+                  var document = new Document( item.id );
+                  _.expand( document, item );
+                  docs.push( document );
+               });
+               deferred.resolve( docs );
+            } else {
+               deferred.resolve( null );
+            } 
+         });
+         return deferred.promise;
+      };
       
       return {
-         getBooks : function() {
-            var deferred = q.defer();
-            timeout( function() {
-               deferred.resolve( books );
-            } );
-            return deferred.promise;
+         encodePatronIdFromBarcode : encodePatronIdFromBarcode,
+         encodeBookIdFromBarcode : encodeBookIdFromBarcode,
+         getDocument : getDocument,
+         putDocument : putDocument,
+         scanDocuments : scanDocuments,
+         getAllDocuments: getAllDocuments,
+         
+         
+         scanBooks : function( searchText ) {
+            return scanDocuments( "book-", searchText );
          },
-         findBooks : function( searchPattern ) {
-            var deferred = q.defer();
-            timeout( function() {
-               deferred.resolve( books );
-            } );
-            return deferred.promise;
-            
+         getAllBooks : function() {  
+            return getAllDocuments( "book-" );
          },
          getBookByBarcode : function( bookBarcode ) {
-            var bookKey = "book-barcode-" + bookBarcode;
-            return db.getDocument( bookKey )
-            .then( function( doc ) { 
-               console.log( doc );
-               return doc;
-            } );
+            return getDocument( encodeBookIdFromBarcode( bookBarcode ) );
          },
-         getPatrons : function() {  
-            var deferred = q.defer();
-            timeout( function() {
-               deferred.resolve( patrons );
-            } );
-            return deferred.promise;
+         
+         
+         scanPatrons : function( searchText ) {
+            return scanDocuments( "patron-", searchText );
+         },
+         getAllPatrons : function() {  
+            return getAllDocuments( "patron-" );
          },
          getPatronByBarcode : function( patronBarcode ) {
-            var patronKey = "patron-barcode-" + patronBarcode;
-            return db.getDocument( patronKey )
-            .then( function( doc ) { 
-               console.log( doc );
-               return doc;
-            } );
+            return getDocument( encodePatronIdFromBarcode( patronBarcode ) );
          },
-         getIssuedBooksByPatron: function( patron ) {
-            var deferred = q.defer();
-            var issuedBooks = [];
-            if( patron && patron.issuedBooks ) {
-               allBooksPromises = [];
-               patron.issuedBooks.forEach( function( bookKey ) {
-                  allBooksPromises.push(
-                     db.getDocument( bookKey ) 
-                     .then( function( doc ) {
-                        issuedBooks.push( doc );
-                        return doc;
-                     })
-                  );
-               } );
-               q.all( allBooksPromises ) 
-               .then( function() {
-                  deferred.resolve( issuedBooks );
-               });
-            }
-            else {
-               deferred.resolve( issuedBooks );
-            }
-            return deferred.promise;
-         },
-         getBookIssue : function( book ) {
-            var deferred = q.defer();
-            timeout( function() {
-               var foundPatron = false;
-               circulations.forEach( function( issue ) {
-                  if( issue.book == book && issue.status == "ISSUED" ) {
-                     deferred.resolve( issue );
-                  }
-               });
-               if( !foundPatron ) {
-                  deferred.resolve( null );
-               }
-            } );
-            return deferred.promise;
-         },
-         issueBookForPatron : function( patron, book ) {
-            var deferred = q.defer();
-            timeout( function() {
-               var issue = {
-                  book: book,
-                  patron: patron,
-                  status: "ISSUED"
-               };
-               circulations.push( issue );
-               if( book.issuedStatus == null || book.issuedStatus == "RETURNED" ) {
-                  book.issuedBy = patron;
-                  book.issueStatus = "ISSUED";
-               } else {
-                  book.issuedStatus = "RETURNED" ;
-               }
-               deferred.resolve( null );
-            } );
-            return deferred.promise;
-         }
+         
+         
+         // getIssuedBooksByPatron: function( patron ) {
+         //    var deferred = q.defer();
+         //    var issuedBooks = [];
+         //    if( patron && patron.issuedBooks ) {
+         //       allBooksPromises = [];
+         //       patron.issuedBooks.forEach( function( bookKey ) {
+         //          allBooksPromises.push(
+         //             db.getDocument( bookKey ) 
+         //             .then( function( doc ) {
+         //                issuedBooks.push( doc );
+         //                return doc;
+         //             })
+         //          );
+         //       } );
+         //       q.all( allBooksPromises ) 
+         //       .then( function() {
+         //          deferred.resolve( issuedBooks );
+         //       });
+         //    }
+         //    else {
+         //       deferred.resolve( issuedBooks );
+         //    }
+         //    return deferred.promise;
+         // }
       };
    } ];  // service
     

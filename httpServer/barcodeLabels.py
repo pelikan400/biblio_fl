@@ -550,8 +550,8 @@ class Label( object ) :
         startY = centerY - self.barHeight / 2
         startX = centerX - symbolExtent / 2
         self.drawSymbolEncoding( startX, startY, encoding )
-        if self.options.horizontalBearerBar :
-           bearerBarExtent = self.barWidth * 7
+        if self.options.bearerBar :
+           bearerBarExtent = self.barWidth * 5
            self.ctx.set_line_width( bearerBarExtent )
            self.ctx.move_to( startX - bearerBarExtent, startY )
            self.ctx.line_to( startX + symbolExtent + bearerBarExtent, startY )

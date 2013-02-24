@@ -547,7 +547,20 @@ class Label( object ) :
             self.barcodeRendererCounter = ( self.barcodeRendererCounter + 1 ) % len( self.barcodeRendererList )
         text, encoding = barcodeRenderer.encode( text )
         symbolExtent = self.symbolExtent( encoding )
-        self.drawSymbolEncoding( centerX - symbolExtent / 2, centerY - self.barHeight / 2, encoding )
+        startY = centerY - self.barHeight / 2
+        startX = centerX - symbolExtent / 2
+        self.drawSymbolEncoding( startX, startY, encoding )
+        if self.options.horizontalBearerBar :
+           bearerBarExtent = self.barWidth * 7
+           self.ctx.set_line_width( bearerBarExtent )
+           self.ctx.move_to( startX - bearerBarExtent, startY )
+           self.ctx.line_to( startX + symbolExtent + bearerBarExtent, startY )
+           self.ctx.move_to( startX - bearerBarExtent, startY + self.barHeight )
+           self.ctx.line_to( startX + symbolExtent + bearerBarExtent, startY + self.barHeight )
+           self.ctx.stroke()
+           
+           
+           
         textY = centerY + self.barHeight / 2 + cmToPoints( 0.5 )
         textEndX = self.showText( centerX, textY, text, textSize = 12 )
         if labelNote :
@@ -706,6 +719,7 @@ def parseCommandLineOptions() :
     parser.add_option( "--withBorderLines", dest="withBorderLines", action="store_true", default = False )
     parser.add_option( "--counter", dest="counter", type="int", default = 0 )
     parser.add_option( "--computeChecksum", dest="computeChecksum", action="store_false", default = True )
+    parser.add_option( "--bearerBar", dest="bearerBar", action="store_true", default = False )
     return parser.parse_args()
 
 def generateLabels( destinationFile, options ) :

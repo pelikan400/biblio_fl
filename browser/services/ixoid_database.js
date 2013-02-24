@@ -3,11 +3,12 @@
 define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
    var dummyData = null;
    var books = null;
-   var patrons = null;
+   var customers = null;
    var circulations = [];
 
    var service = [ "$q", "$timeout", "$http", "$resource", function( q, timeout, $http, $resource ) {
-       ////////////////////////////////////////////////////////////////////////////////////////////////////
+      
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
 
       
       // API proposal: 
@@ -19,20 +20,20 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
       var db = dbm.db( $http, "/db" );
       
       var dumpDummyDataIntoDatabase = function() {
-         var patronPromises = [];
-         patrons.forEach( function( patron ) {
-            patron.id = "patron-barcode-" + patron.barcode;
-            patron.schoolClass = "1a";
-            patron.docType = "PATRON";
-            patron.maximumIssues = 1;
-            patronPromises.push( db.putDocument( patron.id, patron )
+         var customerPromises = [];
+         customers.forEach( function( customer ) {
+            customer.id = "customer-barcode-" + customer.barcode;
+            customer.schoolClass = "1a";
+            customer.docType = "PATRON";
+            customer.maximumIssues = 1;
+            customerPromises.push( db.putDocument( customer.id, customer )
                .then( function( item ) {
                   console.log( "PUT succeeded" );
                   console.log( item );
                }) 
             );
          });
-         q.all( patronPromises ) 
+         q.all( customerPromises ) 
          .then( function( result ) {
             console.log( "All PUT's succeeded" );
          });
@@ -59,7 +60,7 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
        // - only one client may access the CouchDB
        // - implement conditional PUT (use ETag)
        // - every PUT will also save meta infos 
-       // - read all patrons and books 
+       // - read all customers and books 
        // - hold data in localstorage
        // - synchronize data automagically every 5 minutes 
        // - synchronize on logout 
@@ -92,12 +93,19 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
          return s.join('');
       }
       
+      function inherit( Child, Parent ) {
+         _.extend( Child.prototype, Parent.prototype );
+      }
       
-      function Document( id, generateUuid )
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function Document( id, uuid )
       {
-         this.id = id;
-         if( generateUuid ) {
-            this.id += "-uuid-" + randomUUID(); 
+         if( id ) {
+            this.id = id;
+         } 
+         if( uuid ) {
+            this.id += uuid; 
          }
       }
       
@@ -107,23 +115,26 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
          self = this;
          return db.getDocument( self.id )
          .then( function( doc ) { 
+            console.log( "Document.get returned with:" );
+            console.log( doc );
             if( doc ) {
-               console.log( doc );
-               _.expand( self, doc );
+               _.extend( self, doc );
                return self;
             } else {
                return null;
             }
          } );
       };
+      
       
       Document.prototype.put = function() {
          self = this;
          return db.putDocument( self.id, self )
          .then( function( doc ) { 
+            console.log( "Document.put returned with:" );
+            console.log( doc );
             if( doc ) {
-               console.log( doc );
-               _.expand( self, doc );
+               _.extend( self, doc );
                return self;
             } else {
                return null;
@@ -131,30 +142,74 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
          } );
       };
       
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function Book( uuid ) {
+         Document.call( this, Book.idPrefix, uuid );
+      }
       
-      var encodePatronIdFromBarcode = function( barcode ) {
-         return "patron-barcode-" + barcode;
+      _.extend( Book.prototype, Document.prototype );
+      
+      Book.idPrefix = "book-";
+      
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      function Customer( uuid ) {
+         Document.call( this, Customer.idPrefix, uuid );
+      }
+      
+      _.extend( Customer.prototype, Document.prototype );
+
+      Customer.idPrefix = "patron-";
+      
+      Customer.prototype.addBook = function( bookId ) {
+         if( !this.books ) {
+            this.books = {};
+         }
+         this.books[ bookId ] = bookId;
       };
 
       
-      var encodeBookIdFromBarcode = function( barcode ) {
-         return "book-barcode-" + barcode;
+      Customer.prototype.removeBook = function( bookId ) {
+         if( customerHasBook( this, bookId ) ) {
+            delete this.books[ bookId ];
+         }
+      };
+
+      
+      Customer.prototype.hasBook = function( bookId ) {
+         if( !this.books ) {
+            return false;
+         }
+         return bookId in this.books;
       };
       
       
-      var getDocument = function( id ) {
-         return (new Document( id )).get();
+      Customer.prototype.changeBarcode = function( barcode ) {
+         
+      };
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      var encodeBarcodeUuid = function( barcode ) {
+         return "barcode-" + barcode;
       };
       
-      var scanDocuments = function( idPrefix, searchText ) {
+      
+      var getDocument = function( Klass, uuid ) {
+         return ( new Klass( uuid ) ).get();
+      };
+      
+      
+      var scanDocuments = function( Klass, searchText ) {
          var deferred = q.defer();
-         db.scanDocuments( idPrefix, searchText )
+         db.scanDocuments( Klass.idPrefix, searchText )
          .then( function( docArray ) {
             if( docArray ) {
                var docs = [];
                docArray.forEach( function( item ) {
                   var document = new Document( item.id );
-                  _.expand( document, item );
+                  _.extend( document, item );
                   docs.push( document );
                });
                deferred.resolve( docs );
@@ -165,15 +220,16 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
          return deferred.promise;
       };
 
-      var getAllDocuments = function( idPrefix ) {
+      
+      var getAllDocuments = function( Klass ) {
          var deferred = q.defer();
-         db.scanDocuments( idPrefix, searchText )
+         db.scanDocuments( Klass.idPrefix, searchText )
          .then( function( docArray ) {
             if( docArray ) {
                var docs = [];
                docArray.forEach( function( item ) {
-                  var document = new Document( item.id );
-                  _.expand( document, item );
+                  var document = new Klass( item.id );
+                  _.extend( document, item );
                   docs.push( document );
                });
                deferred.resolve( docs );
@@ -184,43 +240,42 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
          return deferred.promise;
       };
       
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
+
       return {
-         encodePatronIdFromBarcode : encodePatronIdFromBarcode,
-         encodeBookIdFromBarcode : encodeBookIdFromBarcode,
          getDocument : getDocument,
-         putDocument : putDocument,
          scanDocuments : scanDocuments,
          getAllDocuments: getAllDocuments,
          
          
          scanBooks : function( searchText ) {
-            return scanDocuments( "book-", searchText );
+            return scanDocuments( Book, searchText );
          },
          getAllBooks : function() {  
-            return getAllDocuments( "book-" );
+            return getAllDocuments( Book );
          },
          getBookByBarcode : function( bookBarcode ) {
-            return getDocument( encodeBookIdFromBarcode( bookBarcode ) );
+            return getDocument( Book, encodeBarcodeUuid( bookBarcode ) );
          },
          
          
-         scanPatrons : function( searchText ) {
-            return scanDocuments( "patron-", searchText );
+         scanCustomers : function( searchText ) {
+            return scanDocuments( Customer, searchText );
          },
-         getAllPatrons : function() {  
-            return getAllDocuments( "patron-" );
+         getAllCustomers : function() {  
+            return getAllDocuments( Customer );
          },
-         getPatronByBarcode : function( patronBarcode ) {
-            return getDocument( encodePatronIdFromBarcode( patronBarcode ) );
+         getCustomerByBarcode : function( customerBarcode ) {
+            return getDocument( Customer, encodeBarcodeUuid( customerBarcode ) );
          },
          
          
-         // getIssuedBooksByPatron: function( patron ) {
+         // getIssuedBooksByCustomer: function( customer ) {
          //    var deferred = q.defer();
          //    var issuedBooks = [];
-         //    if( patron && patron.issuedBooks ) {
+         //    if( customer && customer.issuedBooks ) {
          //       allBooksPromises = [];
-         //       patron.issuedBooks.forEach( function( bookKey ) {
+         //       customer.issuedBooks.forEach( function( bookKey ) {
          //          allBooksPromises.push(
          //             db.getDocument( bookKey ) 
          //             .then( function( doc ) {

@@ -29,9 +29,29 @@
             <input class="input-xlarge" type="text" ng-model="generalInputText">
          </form>
       </div>
-      <div class="span7" ng-show="patron">
-         <p><span class="label label-info">{{ patron.barcode }}</span> <span class="label">{{ patron.firstName }} {{ patron.lastName }} </span><i class="icon-edit"></i></p>
+      <div class="span7" ng-show="customer">
+         <p><span class="label label-info">{{ customer.barcode }}</span> <span class="label">{{ customer.firstName }} {{ customer.lastName }} </span><i class="icon-edit"></i></p>
       </div>
+   </div>
+
+   <hr/>
+
+	<div class="row">
+		<h4 ng-show="customer">
+			Kunde: <span class="label label-info">{{
+				customer.barcode }}</span> <span class="label">{{
+				customer.firstName }} {{ customer.lastName }} </span><i class="icon-edit"></i>
+		</h4>
+	</div>
+
+	<hr/>
+
+   <div class="row">
+      <h4>
+         Buchungen <span class="label label-info">{{
+            customer.barcode }}</span> <span class="label">{{
+            customer.firstName }} {{ customer.lastName }} </span><i class="icon-edit"></i>
+      </h4>
    </div>
 
    <div class="row">
@@ -48,8 +68,8 @@
          </div>
       </div>
    </div>
-   
-   <div class="row">
+
+		<div class="row">
       <div class="span12">
          <div data-ng-view></div>
       </div>

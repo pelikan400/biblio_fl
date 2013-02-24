@@ -1,7 +1,8 @@
-define( function() {
-   'use strict';
+'use strict';
 
-   // TODO we need access to database of books, patrons, and circulations
+define( function() {
+
+   // TODO we need access to database of books, customers, and circulations
    
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,41 +19,18 @@ define( function() {
     var controller = [ '$scope', "ixoidDatabase", function BookLoansController( $scope, db ) {
         $scope.searchedBooks = null;
         $scope.issuedBooks = null;
-        $scope.patron = null;
+        $scope.customer = null;
         $scope.generalInputText = "";
         console.log( "BookLoansController initialized." );
 
-        var getIssuedBooks = function( patron ) {
-           return db.getIssuedBooksByPatron( patron )
+        var getIssuedBooks = function( customer ) {
+           return db.getIssuedBooksByCustomer( customer )
            .then( function( issuedBooks ) {
               console.log( "issuedBooks are:" );
               console.log( issuedBooks );
               $scope.issuedBooks = issuedBooks;
               return issuedBooks;
            } );
-        };
-        
-        
-        var patronAddBook = function( patron, bookId ) {
-           if( !patron.books ) {
-              patron.books = {};
-           }
-           patron.books[ bookId ] = bookId;
-        };
-
-        
-        var patronRemoveBook = function( patron, bookId ) {
-           if( patronHasBook( patron, bookId ) ) {
-              delete patron.books[ bookId ];
-           }
-        };
-
-        
-        var patronHasBook = function( patron, bookId ) {
-           if( !patron.books ) {
-              return false;
-           }
-           return bookId in patron.books;
         };
         
         
@@ -63,14 +41,16 @@ define( function() {
             if( isDigit( text ) ) {
                if( text.length < 6 || text[0] == "0" ) {
                    console.log( "Person ID detected: " + text );
-                   db.getPatronByBarcode( text )
-                   .then( function( patron ) {
-                      $scope.patron = patron;
-                      getIssuedBooks( patron );
-                       return patron;
+                   db.getCustomerByBarcode( text )
+                   .then( function( customer ) {
+                      if( customer ) {
+                         $scope.customer = customer;
+                         getIssuedBooks( customer );
+                         return customer;
+                      }
                    });
                } else {
-                 // save book AND patron on every status change of the book 
+                 // save book AND customer on every status change of the book 
                    console.log( "Book ID detected: " + text );
                    db.getBookByBarcode( text )
                    .then( function( book ) {
@@ -78,30 +58,30 @@ define( function() {
                         console.log( "found book" );
                         console.log( book );
                         if( !book.issuedBy ) {
-                           book.issuedBy = $scope.patron.id;
+                           book.issuedBy = $scope.customer.id;
                            book.issuedStatus = "ISSUED";
-                           getIssuedBooks( $scope.patron );
+                           getIssuedBooks( $scope.customer );
                         }
-                        else if( book.issuedBy == $scope.patron.id ) {
+                        else if( book.issuedBy == $scope.customer.id ) {
                            if( book.issuedStatus == "RETURNED" ) {
                               book.issuedStatus = "ISSUED";
                            } else {
                               book.issuedStatus = "RETURNED";
                            }
-                           getIssuedBooks( $scope.patron );
+                           getIssuedBooks( $scope.customer );
                         } else {
                            if( book.issuedStatus == "RETURNED" ) {
                               book.issuedStatus = "ISSUED";
-                              book.issuedBy = $scope.patron.id;
-                              getIssuedBooks( $scope.patron );
+                              book.issuedBy = $scope.customer.id;
+                              getIssuedBooks( $scope.customer );
                            }
                            else {
-                              // change the patron and set to RETURNED
+                              // change the customer and set to RETURNED
                               book.issuedStatus = "RETURNED";
-                              $scope.patron = db.getPatronByBarcode( book.patron.barcode )
-                              .then( function( patron ) {
-                                 getIssuedBooks( patron );
-                                 return patron;
+                              $scope.customer = db.getCustomerByBarcode( book.customer.barcode )
+                              .then( function( customer ) {
+                                 getIssuedBooks( customer );
+                                 return customer;
                               });
                            }
                         }

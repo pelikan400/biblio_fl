@@ -104,7 +104,7 @@ class Resource( object ):
    def getRole( self ):
       if not cherrypy.session.has_key( "systemUserRole" ) :
          print "system user role not found in session; setting it to GUEST"
-         cherrypy.session.setItem( "systemUserRole", "GUEST" )
+         cherrypy.session[ "systemUserRole" ] =  "GUEST"
       role = cherrypy.session[ "systemUserRole" ]
       return role
          

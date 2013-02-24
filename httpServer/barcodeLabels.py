@@ -13,8 +13,9 @@ pageA4HeightInPoints = cmToPoints( 29.7 )
 ##############################################################################################################
 
 class Barcode( object ) :
-    def __init__( self ) : 
-        pass
+    def __init__( self, computeChecksum = True ) :
+       self.computeChecksum = computeChecksum
+       pass
 
     def insertSpacesIntoText( self, text, distance = 2 ) :
         textWithSpace = ""
@@ -48,9 +49,12 @@ class Barcode( object ) :
             x = 0
         return x
 
-    def paddWithZeroAndComputeChecksum( self, text, minimumPadding = 6 ) :
-        newText = text.zfill( minimumPadding - 1 )
-        newText += "%s" % self.computeEanChecksum( newText )
+    def paddWithZeroAndComputeChecksum( self, text, minimumPadding = 4 ) :
+        if self.computeChecksum : 
+           newText = text.zfill( minimumPadding - 1 )
+           newText += "%s" % self.computeEanChecksum( newText )
+        else : 
+           newText = text.zfill( minimumPadding )
         return newText
 
         
@@ -99,6 +103,9 @@ class BarcodeEAN( Barcode ) :
 
     startPattern = "111"
     middlePattern = "11111"
+
+    def __init__( self, computeChecksum = False ) :
+       Barcode.__init__( self, computeChecksum = computeChecksum )
 
     def internalEncoding( self, inputText ) :
         inputTextLength = len( inputText )
@@ -170,8 +177,8 @@ class BarcodeITF( Barcode ) :
         "311"  # stop
     ]
 
-    def __init__( self ) :
-        Barcode.__init__( self )
+    def __init__( self, computeChecksum = False ) :
+       Barcode.__init__( self, computeChecksum = computeChecksum )
 
     def encodeSymbolPair( self, c1, c2 ) :
         symbolEncoding1 = self.encodingList[ c1 ]
@@ -346,8 +353,8 @@ class Barcode128( Barcode ) :
         "2331112" # Stopzeichen
     ]
 
-    def __init__( self ) : 
-        Barcode.__init__( self )
+    def __init__( self, computeChecksum = False ) :
+       Barcode.__init__( self, computeChecksum = computeChecksum )
 
     def internalEncode( self, symbols, startSymbol = 105 ) :
         moduloSum = 0
@@ -486,8 +493,8 @@ class Label( object ) :
         self.ctx.set_line_width( 1 )
         self.ctx.set_source_rgb( 0, 0, 0 )
         self.barcodeRendererList = []
-        self.barcodeRendererList.append( Barcode128() )
-        # self.barcodeRendererList.append( BarcodeITF() )
+        # self.barcodeRendererList.append( Barcode128( computeChecksum = options.computeChecksum ) )
+        self.barcodeRendererList.append( BarcodeITF( computeChecksum = options.computeChecksum ) )
         # self.barcodeRendererList.append( Barcode39() )
         # self.barcodeRendererList.append( BarcodeEAN() )
         self.barcodeRendererCounter = 0
@@ -570,7 +577,7 @@ class Label( object ) :
 
     def drawLabelTitle( self, centerX, y ) :
         # centerX, centerY is the center of the text, not the center of the label
-        self.showText( centerX, y + cmToPoints( 0.5 ), self.labelTitle, textSize = 8 )
+        self.showText( centerX, y + cmToPoints( 0.5 ), self.labelTitle, textSize = 6 )
 
 
     def drawLabel( self, x, y, text, labelNote = None ) : 
@@ -588,24 +595,26 @@ class Label( object ) :
         self.drawDestinationDescription( destinationDescription )
         labelsLength = len( labels )
         labelsCounter = 0
-        x = self.labelSheet[ "offsetX" ]
-        for itX in range( 0, self.labelSheet[ "columns" ] ) :
-            y = self.labelSheet[ "offsetY" ]
-            for itY in range( 0, self.labelSheet[ "rows" ] ) :
-                label = labels[ labelsCounter ]
-                labelSplit = label.split( "*" )
-                labelText = labelSplit[ 0 ]
-                labelNote = ""
-                if len( labelSplit ) > 1 : 
-                    labelNote = labelSplit[ 1 ]
-                # print "drawLabel '%s': %7.2f, %7.2f" % ( labelText, x ,y )
-                self.drawLabel( x, y, labelText, labelNote ) 
-                labelsCounter = ( labelsCounter + 1 ) % labelsLength
-                self.ctx.stroke()
-                if labelsCounter == 0 : 
-                    return
-                y += self.labelSheet[ "labelHeight" ] + self.labelSheet[ "interLabelY" ]
-            x += self.labelSheet[ "labelWidth" ] + self.labelSheet[ "interLabelX" ]
+        while True:
+           x = self.labelSheet[ "offsetX" ]
+           for itX in range( 0, self.labelSheet[ "columns" ] ) :
+               y = self.labelSheet[ "offsetY" ]
+               for itY in range( 0, self.labelSheet[ "rows" ] ) :
+                   label = labels[ labelsCounter ]
+                   labelSplit = label.split( "*" )
+                   labelText = labelSplit[ 0 ]
+                   labelNote = ""
+                   if len( labelSplit ) > 1 : 
+                       labelNote = labelSplit[ 1 ]
+                   # print "drawLabel '%s': %7.2f, %7.2f" % ( labelText, x ,y )
+                   self.drawLabel( x, y, labelText, labelNote ) 
+                   labelsCounter += 1
+                   self.ctx.stroke()
+                   if labelsCounter >= labelsLength : 
+                       return
+                   y += self.labelSheet[ "labelHeight" ] + self.labelSheet[ "interLabelY" ]
+               x += self.labelSheet[ "labelWidth" ] + self.labelSheet[ "interLabelX" ]
+           self.ctx.show_page()
 
 
     def drawPageWithCounter( self, destinationDescription, counter = 0 ) :
@@ -696,6 +705,7 @@ def parseCommandLineOptions() :
     parser.add_option( "--labelTitle", dest="labelTitle", type="string", default = "Bibliothek KGS Forster Linde" )
     parser.add_option( "--withBorderLines", dest="withBorderLines", action="store_true", default = False )
     parser.add_option( "--counter", dest="counter", type="int", default = 0 )
+    parser.add_option( "--computeChecksum", dest="computeChecksum", action="store_false", default = True )
     return parser.parse_args()
 
 def generateLabels( destinationFile, options ) :

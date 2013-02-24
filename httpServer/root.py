@@ -14,7 +14,7 @@ class RootPage( object ):
     index.exposed = True
 
     # def readBarcodeOptions( self, **kwargs ) :
-    def readBarcodeOptions( self, description = "", labels = "", labelSheet = "avery4780", 
+    def readBarcodeOptions( self, description = "", labels = "", labelSheet = "avery4780", computeChecksum = False,
                             withBorderLines = "", labelTitle = "Bibliothek KGS Forster Linde", counter = "0" ) :
         options = DictMixin()
         options.description = description
@@ -23,6 +23,7 @@ class RootPage( object ):
         options.withBorderLines = bool( withBorderLines )
         options.labelTitle = labelTitle
         options.counter = int( counter )
+        options.computeChecksum = bool( computeChecksum )
         return options
         
     def barcode( self, **kwargs ) :

@@ -16,11 +16,10 @@ def readRecords( file ):
       for x in ( x.strip( '"' ) for x in line.split( ';' ) ) :
          record.append( x )
       recordMap = {}
-      recordMap[ "bookNumber" ] = record[ 0 ]
       recordMap[ "signature" ] = record[ 1 ]
       recordMap[ "title" ] = record[ 2 ]
       recordMap[ "author" ] = record[ 3 ]
-      recordMap[ "editor" ] = record[ 4 ]
+      recordMap[ "publisher" ] = record[ 4 ]
       yield recordMap
       
       
@@ -43,22 +42,24 @@ def main():
     labelParameter = ""
     barcodeLink= "http://www.ixoid.de:8080/barcode?labels="
     firstLine = True
+    print >> outfile, "var books = ["
     for x in readRecords( infile ) :
        if firstLine :
           firstLine = False
           continue
        x[ "barcode" ] =  barcode.paddWithZeroAndComputeChecksum( "%s" % labelCounter, minimumPadding = 6 )
-       print >> outfile, json.dumps( x ).encode( 'UTF-8' )
+       print >> outfile, json.dumps( x ).encode( 'UTF-8' ), ","
        moduloCounter = ( labelCounter - options.counter ) % labelsPerPage
        if moduloCounter != 0 :
           labelParameter += ","
-       labelParameter += "%s*%s%s" % ( x[ "barcode" ], x[ "signature" ], x[ "bookNumber" ] )
+       labelParameter += "%s*%s%s" % ( x[ "barcode" ], x[ "signature" ], "" )
        if moduloCounter == labelsPerPage -1 :
           print >> barcodeLinksFile, "%s%s" % ( barcodeLink, labelParameter )
           print >> barcodeLinksFile
           labelParameter = ""
        labelCounter += 1
     print >> barcodeLinksFile, "%s%s" % ( barcodeLink, labelParameter )
+    print >> outfile, "];"
        
        
        

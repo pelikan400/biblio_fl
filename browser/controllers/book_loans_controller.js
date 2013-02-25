@@ -24,6 +24,11 @@ define( function() {
         console.log( "BookLoansController initialized." );
 
         var getIssuedBooks = function( customer ) {
+           var bookPromisesList = [];
+           customer.books.forEach( function( bookId ) {
+              bookPromisesList.push( db.getBook( bookId ) );
+           } );
+           
            return db.getIssuedBooksByCustomer( customer )
            .then( function( issuedBooks ) {
               console.log( "issuedBooks are:" );
@@ -36,18 +41,18 @@ define( function() {
         
         // TODO: put focus on generalInputText ?
         $scope.parseGeneralInput = function () {
-            console.log( "Input is: '" + $scope.generalInputText + "'" );
+           console.log( "Input is: '" + $scope.generalInputText + "'" );
+           console.log( "Import dummy data" );
+            db.importDummyData();
             var text = $scope.generalInputText;
             if( isDigit( text ) ) {
                if( text.length < 6 || text[0] == "0" ) {
                    console.log( "Person ID detected: " + text );
                    db.getCustomerByBarcode( text )
                    .then( function( customer ) {
-                      if( customer ) {
                          $scope.customer = customer;
                          getIssuedBooks( customer );
                          return customer;
-                      }
                    });
                } else {
                  // save book AND customer on every status change of the book 

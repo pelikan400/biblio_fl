@@ -1,9 +1,6 @@
 "use strict";
    
-define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
-   var dummyData = null;
-   var books = null;
-   var customers = null;
+define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angular, _, dbm, dummyData ) {
    var circulations = [];
 
    var service = [ "$q", "$timeout", "$http", "$resource", function( q, timeout, $http, $resource ) {
@@ -99,16 +96,19 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
       
       ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      function Document( id, uuid )
+      function Document( id, idPrefix )
       {
          if( id ) {
             this.id = id;
-         } 
-         if( uuid ) {
-            this.id += uuid; 
+         } else {
+            if( !idPrefix ) {
+               idPrefix = Document.idPrefix;
+            }
+            this.id = idPrefix + randomUUID(); 
          }
       }
       
+      Document.idPrefix = "doc-";
       
       Document.prototype.get = function() {
          // TODO: where do we hold the meta informations, like etag
@@ -144,8 +144,8 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
       
       ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      function Book( uuid ) {
-         Document.call( this, Book.idPrefix, uuid );
+      function Book( id ) {
+         Document.call( this, id, Book.idPrefix );
       }
       
       _.extend( Book.prototype, Document.prototype );
@@ -154,13 +154,13 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
       
       ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      function Customer( uuid ) {
-         Document.call( this, Customer.idPrefix, uuid );
+      function Customer( id ) {
+         Document.call( this, id, Customer.idPrefix );
       }
       
       _.extend( Customer.prototype, Document.prototype );
 
-      Customer.idPrefix = "patron-";
+      Customer.idPrefix = "customer-";
       
       Customer.prototype.addBook = function( bookId ) {
          if( !this.books ) {
@@ -188,7 +188,17 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
       Customer.prototype.changeBarcode = function( barcode ) {
          
       };
+      
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      function Barcode( barcode ) {
+         Document.call( this, Barcode.idPrefix + barcode );
+      }
+      
+      _.extend( Barcode.prototype, Document.prototype );
+
+      Barcode.idPrefix = "barcode-";
+     
       ////////////////////////////////////////////////////////////////////////////////////////////////////
 
       var encodeBarcodeUuid = function( barcode ) {
@@ -196,10 +206,34 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
       };
       
       
-      var getDocument = function( Klass, uuid ) {
-         return ( new Klass( uuid ) ).get();
+      var getDocument = function( Klass, id ) {
+         return ( new Klass( id ) ).get();
       };
       
+      var getDocumentByBarcode = function( Klass, barcode ) {
+         return ( new Barcode( barcode ) ).get()
+         .then( function( barcodeObject ) {
+               if( barcodeObject ) {
+                  ( new Klass( barcodeObject.reference ) ).get()
+                  .then( function( obj ) {
+                     return obj;
+                  });
+               }
+         });
+      };
+
+      var setNewBarcodeForObject = function( obj, barcode ) {
+         var newBarcodeObj = new Barcode( barcode );
+         return newBarcodeObj.get()
+         .then( function( barcodeObject ) {
+               if( !barcodeObject ) {
+                  newBarcodeObj.reference = obj.id;
+                  return newBarcodeObj.put();
+               } else {
+                  return null;
+               }
+         });
+      } 
       
       var scanDocuments = function( Klass, searchText ) {
          var deferred = q.defer();
@@ -239,14 +273,34 @@ define( [ "angular", "underscore", "./restDB" ], function( angular, _, dbm ) {
          });
          return deferred.promise;
       };
+
+      
+      var importDummyData = function() {
+         dummyData.customers.forEach( function( item ) {
+            var customer = new Customer();
+            _.extend( customer, item );
+            customer.put();
+            var barcodeObj = new Barcode( customer.barcode );
+            barcodeObj.reference = customer.id;
+            barcodeObj.put();
+         } );
+         dummyData.books.forEach( function( item ) {
+            var book = new Book();
+            _.extend( book, item );
+            book.put();
+            var barcodeObj = new Barcode( customer.barcode );
+            barcodeObj.reference = book.id;
+            barcodeObj.put();
+         } );
+      }
       
       ////////////////////////////////////////////////////////////////////////////////////////////////////
 
       return {
+         importDummyData: importDummyData,
          getDocument : getDocument,
          scanDocuments : scanDocuments,
          getAllDocuments: getAllDocuments,
-         
          
          scanBooks : function( searchText ) {
             return scanDocuments( Book, searchText );

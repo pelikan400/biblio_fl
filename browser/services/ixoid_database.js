@@ -54,17 +54,8 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       
       
        // TODO: 
-       // - only one client may access the CouchDB
        // - implement conditional PUT (use ETag)
        // - every PUT will also save meta infos 
-       // - read all customers and books 
-       // - hold data in localstorage
-       // - synchronize data automagically every 5 minutes 
-       // - synchronize on logout 
-       // - mark every data as dirty on change
-       // - save only marked data entry and clear the mark
-       // - use SimpleDB instead of CouchDB
-       // - host entire App in S3 or Cloud Storage
        // - minimize and obfuscate the javascript code 
        // - what about authentication and security (read-only vs. read-write)
             

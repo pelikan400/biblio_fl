@@ -4,6 +4,7 @@ import string
 import barcodeLabels
 
 barcode = barcodeLabels.BarcodeITF()
+barcode.computeChecksum = True
 
 print barcode.paddWithZeroAndComputeChecksum( "100", minimumPadding = 6 )
 

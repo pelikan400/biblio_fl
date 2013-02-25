@@ -214,10 +214,12 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          return ( new Barcode( barcode ) ).get()
          .then( function( barcodeObject ) {
                if( barcodeObject ) {
-                  ( new Klass( barcodeObject.reference ) ).get()
+                  return ( new Klass( barcodeObject.reference ) ).get()
                   .then( function( obj ) {
                      return obj;
                   });
+               } else {
+                  return null;
                }
          });
       };
@@ -288,7 +290,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             var book = new Book();
             _.extend( book, item );
             book.put();
-            var barcodeObj = new Barcode( customer.barcode );
+            var barcodeObj = new Barcode( book.barcode );
             barcodeObj.reference = book.id;
             barcodeObj.put();
          } );
@@ -309,7 +311,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             return getAllDocuments( Book );
          },
          getBookByBarcode : function( bookBarcode ) {
-            return getDocument( Book, encodeBarcodeUuid( bookBarcode ) );
+            return getDocumentByBarcode( Book, bookBarcode );
          },
          
          
@@ -320,7 +322,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             return getAllDocuments( Customer );
          },
          getCustomerByBarcode : function( customerBarcode ) {
-            return getDocument( Customer, encodeBarcodeUuid( customerBarcode ) );
+            return getDocumentByBarcode( Customer, customerBarcode );
          },
          
          

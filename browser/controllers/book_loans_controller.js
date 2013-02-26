@@ -27,7 +27,7 @@ define( function() {
         $scope.parseGeneralInput = function () {
            console.log( "Input is: '" + $scope.generalInputText + "'" );
            console.log( "Import dummy data" );
-            // db.importDummyData();
+            db.importDummyData();
             var text = $scope.generalInputText;
             if( isDigit( text ) ) {
                if( text.length < 6 || text[0] == "0" ) {
@@ -35,12 +35,14 @@ define( function() {
                    db.getCustomerByBarcode( text )
                    .then( function( customer ) {
                          $scope.customer = customer;
-                         customer.getBooks()
-                         .then( function( books ) {
-                            if( books ) {
-                               $scope.books = books;
-                            }
-                         });
+                         if( customer ) {
+                            customer.getBooks()
+                            .then( function( books ) {
+                               if( books ) {
+                                  $scope.books = books;
+                               }
+                            });
+                         }
                          return customer;
                    });
                } else {

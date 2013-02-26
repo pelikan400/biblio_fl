@@ -493,8 +493,8 @@ class Label( object ) :
         self.ctx.set_line_width( 1 )
         self.ctx.set_source_rgb( 0, 0, 0 )
         self.barcodeRendererList = []
-        # self.barcodeRendererList.append( Barcode128( computeChecksum = options.computeChecksum ) )
-        self.barcodeRendererList.append( BarcodeITF( computeChecksum = options.computeChecksum ) )
+        self.barcodeRendererList.append( Barcode128( computeChecksum = options.computeChecksum ) )
+        # self.barcodeRendererList.append( BarcodeITF( computeChecksum = options.computeChecksum ) )
         # self.barcodeRendererList.append( Barcode39() )
         # self.barcodeRendererList.append( BarcodeEAN() )
         self.barcodeRendererCounter = 0
@@ -605,10 +605,10 @@ class Label( object ) :
     def drawPageWithLabelsList( self, destinationDescription, labels ) :
         if not labels or len( labels ) == 0 :
             return 
-        self.drawDestinationDescription( destinationDescription )
         labelsLength = len( labels )
         labelsCounter = 0
         while True:
+           self.drawDestinationDescription( destinationDescription )
            x = self.labelSheet[ "offsetX" ]
            for itX in range( 0, self.labelSheet[ "columns" ] ) :
                y = self.labelSheet[ "offsetY" ]
@@ -630,19 +630,24 @@ class Label( object ) :
            self.ctx.show_page()
 
 
-    def drawPageWithCounter( self, destinationDescription, counter = 0 ) :
-        self.drawDestinationDescription( destinationDescription )
-        x = self.labelSheet[ "offsetX" ]
-        for itX in range( 0, self.labelSheet[ "columns" ] ) :
-           y = self.labelSheet[ "offsetY" ] 
-           for itY in range( 0, self.labelSheet[ "rows" ] ) :
-                labelText = "%s" % counter
-                # print "drawLabel '%s': %7.2f, %7.2f" % ( labelText, x ,y )
-                self.drawLabel( x, y, labelText ) 
-                self.ctx.stroke()
-                counter += 1
-                y += self.labelSheet[ "labelHeight" ] + self.labelSheet[ "interLabelY" ]
-           x += self.labelSheet[ "labelWidth" ] + self.labelSheet[ "interLabelX" ]
+    def drawPageWithCounter( self, destinationDescription, startCounter = 0, endCounter = 20 ) :
+        while True:
+           self.drawDestinationDescription( destinationDescription )
+           x = self.labelSheet[ "offsetX" ]
+           for itX in range( 0, self.labelSheet[ "columns" ] ) :
+              y = self.labelSheet[ "offsetY" ] 
+              for itY in range( 0, self.labelSheet[ "rows" ] ) :
+                   labelText = "%s" % startCounter
+                   # print "drawLabel '%s': %7.2f, %7.2f" % ( labelText, x ,y )
+                   self.drawLabel( x, y, labelText ) 
+                   self.ctx.stroke()
+                   startCounter += 1
+                   if startCounter >= endCounter : 
+                      return
+                   y += self.labelSheet[ "labelHeight" ] + self.labelSheet[ "interLabelY" ]
+              x += self.labelSheet[ "labelWidth" ] + self.labelSheet[ "interLabelX" ]
+           self.ctx.show_page()
+
 
     def drawPage( self ):
         labelsTextList = None
@@ -653,7 +658,7 @@ class Label( object ) :
         if labelsTextList and len( labelsTextList ) != 0 :
             self.drawPageWithLabelsList( self.options.description, labelsTextList )
         else:
-            self.drawPageWithCounter( self.options.description, self.options.counter )
+            self.drawPageWithCounter( self.options.description, self.options.startCounter, self.options.endCounter )
 
 ##############################################################################################################
 
@@ -717,7 +722,8 @@ def parseCommandLineOptions() :
     parser.add_option( "--labelSheet", dest="labelSheet", type="string", default = "avery4780" )
     parser.add_option( "--labelTitle", dest="labelTitle", type="string", default = "Bibliothek KGS Forster Linde" )
     parser.add_option( "--withBorderLines", dest="withBorderLines", action="store_true", default = False )
-    parser.add_option( "--counter", dest="counter", type="int", default = 0 )
+    parser.add_option( "--startCounter", dest="startCounter", type="int", default = 0 )
+    parser.add_option( "--endCounter", dest="endCounter", type="int", default = 0 )
     parser.add_option( "--computeChecksum", dest="computeChecksum", action="store_false", default = True )
     parser.add_option( "--bearerBar", dest="bearerBar", action="store_true", default = False )
     return parser.parse_args()

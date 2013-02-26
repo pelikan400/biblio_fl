@@ -12,14 +12,16 @@ class RootPage( object ):
     # def readBarcodeOptions( self, **kwargs ) :
     def readBarcodeOptions( self, description = "", labels = "", labelSheet = "avery4780", computeChecksum = "",
                             bearerBar = "",
-                            withBorderLines = "", labelTitle = "Bibliothek KGS Forster Linde", counter = "0" ) :
+                            withBorderLines = "", labelTitle = "Bibliothek KGS Forster Linde", 
+                            startCounter = "0", endCounter = "20" ) :
         options = DictMixin()
         options.description = description
         options.labelsConcaternated = labels
         options.labelSheet = labelSheet
         options.withBorderLines = bool( withBorderLines )
         options.labelTitle = labelTitle
-        options.counter = int( counter )
+        options.startCounter = int( startCounter )
+        options.endCounter = int( endCounter )
         options.computeChecksum = bool( computeChecksum )
         options.bearerBar = bool( bearerBar )
         return options

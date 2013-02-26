@@ -1,5 +1,6 @@
 import cherrypy
 import anydbm
+import traceback
 
 ##############################################################################################################
 
@@ -62,7 +63,7 @@ class BerkeleyDB:
 
    def putItem( self, role, itemKey, item ) :
       if self.filterItem( role, "PUT", itemKey ) :
-         self.db[ itemKey ] = item
+         self.db[ itemKey.encode( "UTF-8" ) ] = item.encode( "UTF-8" )
          return item
       return None
 
@@ -108,51 +109,57 @@ class Resource( object ):
 
    def getRole( self ):
       if not cherrypy.session.has_key( "systemUserRole" ) :
-         print "system user role not found in session; setting it to GUEST"
+         print( "system user role not found in session; setting it to GUEST" )
          cherrypy.session[ "systemUserRole" ] =  "GUEST"
       role = cherrypy.session[ "systemUserRole" ]
       return role
          
-         
+
+   def setHeaders( self ) :
+      pass 
+
    def GET( self, *args, **kwargs ):
-      print "%s with args: %s" % ( "GET", args )
-      cherrypy.response.headers[ "Content-Type" ] = "application/json"
+      print( "%s with args: %s" % ( "GET", args ) )
+      cherrypy.response.headers[ "Content-Type" ] = "application/json;charset=UTF-8"
       role = self.getRole()
       if len( args ) == 1 :
          itemKey = args[ 0 ]
          item = db.getItem( role, itemKey )
          if item :
-            return item
+            print "GET: data: %s" % item
+            traceback.print_stack()
+            return item.encode( "UTF-8" )
       else :
          idPrefix = "p" in kwargs and kwargs[ "p" ] or None
          searchPattern = "q" in kwargs and kwargs[ "q" ] or None
          item = db.allItems( role, idPrefix, searchPattern )
          if item : 
-            return item
+            return item.encode( "UTF-8" )
       cherrypy.response.status = 500
       return ""
 
    
    def PUT( self, *args ):
-      print "%s with args: %s" % ( "PUT", args )
+      print( "%s with args: %s" % ( "PUT", args ) )
       role = self.getRole()
-      cherrypy.response.headers[ "Content-Type" ] = "application/json"
+      cherrypy.response.headers[ "Content-Type" ] = "application/json;charset=UTF-8"
       if len( args ) == 1 :
-         itemKey = args[ 0 ]
-         data = cherrypy.request.body.read()
+         itemKey = unicode( args[ 0 ], "UTF-8"  )
+         data = unicode( cherrypy.request.body.read(), "UTF-8" )
+         print "PUT: Got key: %s and data: %s from browser" % ( itemKey, data ) 
          item = db.putItem( role, itemKey, data )
          if item : 
-            return item
+            return item.encode( "UTF-8" )
       cherrypy.response.status = 500
       return ""
    
    # def OPTIONS( self, *args ) :
-   #    print "%s with args: %s" % ( "OPTIONS", args )
+   #    print( "%s with args: %s" % ( "OPTIONS", args ) )
    #    return "{}"
       
    # @cherrypy.expose
    # def index( self, documentId = None ):
-   #     print "Request is: %s" % cherrypy.request
+   #     print( "Request is: %s" % cherrypy.request )
    #     return "Hello database!"
     
     

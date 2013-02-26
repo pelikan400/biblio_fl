@@ -1,7 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
+# Hällöü ßßßßßßß
+
+
 from optparse import OptionParser
 import json
 import string
 import barcodeLabels
+import codecs
+
+
 
 barcode = barcodeLabels.BarcodeITF()
 barcode.computeChecksum = True
@@ -10,8 +20,9 @@ print barcode.paddWithZeroAndComputeChecksum( "100", minimumPadding = 6 )
 
 def readRecords( file ):
    for line in file :
-      # line = unicode( line, 'UTF-8' )
       line = line.strip( string.whitespace )
+      # nonUnicodeLine = line.encode( "UTF-8" )
+      # print type( line ), repr( line )
       # print line
       record = []
       for x in ( x.strip( '"' ) for x in line.split( ';' ) ) :
@@ -35,9 +46,9 @@ def parseCommandLineOptions() :
 
 def main():
     options, args = parseCommandLineOptions()
-    infile = open( options.inputFileName, "r" )
-    outfile = open( options.outputFileName, "w" )
-    barcodeLinksFile = open( options.linksFileName, "w" )
+    infile = codecs.open( options.inputFileName, "r", encoding = "utf-8" )
+    outfile = codecs.open( options.outputFileName, "w", encoding = "utf-8" )
+    barcodeLinksFile = codecs.open( options.linksFileName, "w", encoding = "utf-8" )
     labelCounter = int( options.counter )
     labelsPerPage = 10000
     labelParameter = ""
@@ -49,7 +60,10 @@ def main():
           firstLine = False
           continue
        x[ "barcode" ] =  barcode.paddWithZeroAndComputeChecksum( "%s" % labelCounter, minimumPadding = 6 )
-       print >> outfile, json.dumps( x ).encode( 'UTF-8' ), ","
+       recordAsJson = unicode( json.dumps( x, ensure_ascii = False ) )
+       print type( recordAsJson ), repr( recordAsJson )
+       # print json.dumps( x ), ","
+       print >> outfile, recordAsJson, ","
        moduloCounter = ( labelCounter - options.counter ) % labelsPerPage
        if moduloCounter != 0 :
           labelParameter += ","

@@ -23,22 +23,6 @@ define( function() {
         $scope.generalInputText = "";
         console.log( "BookLoansController initialized." );
 
-        var getIssuedBooks = function( customer ) {
-           var bookPromisesList = [];
-           customer.books.forEach( function( bookId ) {
-              bookPromisesList.push( db.getBook( bookId ) );
-           } );
-           
-           return db.getIssuedBooksByCustomer( customer )
-           .then( function( issuedBooks ) {
-              console.log( "issuedBooks are:" );
-              console.log( issuedBooks );
-              $scope.issuedBooks = issuedBooks;
-              return issuedBooks;
-           } );
-        };
-        
-        
         // TODO: put focus on generalInputText ?
         $scope.parseGeneralInput = function () {
            console.log( "Input is: '" + $scope.generalInputText + "'" );
@@ -51,7 +35,12 @@ define( function() {
                    db.getCustomerByBarcode( text )
                    .then( function( customer ) {
                          $scope.customer = customer;
-                         getIssuedBooks( customer );
+                         customer.getBooks()
+                         .then( function( books ) {
+                            if( books ) {
+                               $scope.books = books;
+                            }
+                         });
                          return customer;
                    });
                } else {
@@ -63,11 +52,30 @@ define( function() {
                         console.log( "found book" );
                         console.log( book );
                         if( !book.issuedBy ) {
+                           console.log( "Book was never issued" );
+                           if( ! $scope.customer ) {
+                              console.log( "No customer checked in." );
+                              // no customer checked in
+                              return null;
+                           }
                            book.issuedBy = $scope.customer.id;
                            book.issuedStatus = "ISSUED";
-                           getIssuedBooks( $scope.customer );
+                           $scope.customer.addBook( book.id );
+                           book.put()
+                           .then( function( xb ) {
+                              return $scope.customer.put();
+                           })
+                           .then( function( xc ) {
+                              xc.getBooks()
+                              .then( function( books ) {
+                                 if( books ) {
+                                    $scope.books = books;
+                                 }
+                              });
+                           });
                         }
                         else if( book.issuedBy == $scope.customer.id ) {
+                           console.log( "Book was issued by the same customer." );
                            if( book.issuedStatus == "RETURNED" ) {
                               book.issuedStatus = "ISSUED";
                            } else {
@@ -75,7 +83,10 @@ define( function() {
                            }
                            getIssuedBooks( $scope.customer );
                         } else {
+                           console.log( "Book was issued by another customer." );
+                           console.log( book.issuedBy );
                            if( book.issuedStatus == "RETURNED" ) {
+                              console.log( "Book status is RETURNED." );
                               book.issuedStatus = "ISSUED";
                               book.issuedBy = $scope.customer.id;
                               getIssuedBooks( $scope.customer );
@@ -83,8 +94,12 @@ define( function() {
                            else {
                               // change the customer and set to RETURNED
                               book.issuedStatus = "RETURNED";
-                              $scope.customer = db.getCustomerByBarcode( book.customer.barcode )
+                              db.getCustomerByBarcode( book.issuedBy )
                               .then( function( customer ) {
+                                 
+                                 
+                                 
+                                 
                                  getIssuedBooks( customer );
                                  return customer;
                               });

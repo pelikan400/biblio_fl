@@ -2,8 +2,18 @@
    
 define( [], function() {
    var configuration = [ "$routeProvider", "$locationProvider", function( $routeProvider, $locationProvider ) {
-      $routeProvider.when('/customers', {
+      $routeProvider.when('#customers', {
          templateUrl: 'views/customers.html'
+         // controller: ChapterCntl
+      });
+ 
+      $routeProvider.when('#books', {
+         templateUrl: 'views/books.html'
+         // controller: ChapterCntl
+      });
+ 
+      $routeProvider.when('#issues', {
+         templateUrl: 'views/issues.html'
          // controller: ChapterCntl
       });
  

@@ -8,10 +8,6 @@ from UserDict import DictMixin
 current_dir = os.path.dirname( os.path.abspath( __file__ ) )
 
 class RootPage( object ):
-    def index( self ):
-        return "Hello World!"
-
-    index.exposed = True
 
     # def readBarcodeOptions( self, **kwargs ) :
     def readBarcodeOptions( self, description = "", labels = "", labelSheet = "avery4780", computeChecksum = "",

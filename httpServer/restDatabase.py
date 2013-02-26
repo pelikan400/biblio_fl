@@ -57,7 +57,7 @@ class BerkeleyDB:
    def getItem( self, role, itemKey ) : 
       if self.filterItem( role, "GET", itemKey ) :
          if itemKey in self.db :
-            return self.db[ itemKey ]
+            return unicode( self.db[ itemKey ], "UTF-8" )
       return None
 
    def putItem( self, role, itemKey, item ) :
@@ -66,11 +66,16 @@ class BerkeleyDB:
          return item
       return None
 
-   def allItems( self, role ) :
+   def allItems( self, role, idPrefix, searchPattern ) :
       data = "{ "
       first = True
-      for key, value in self.db.iteritems() :
+      for key, valueAscii in self.db.iteritems() :
+         value = unicode( valueAscii, "UTF-8" )
          if not self.filterItem( role, "GET", key ) :
+            continue
+         if idPrefix and key.find( idPrefix ) != 0 :
+            continue
+         if searchPattern and value.find( searchPattern ) == -1 :
             continue
          if first : 
             first = False
@@ -109,7 +114,7 @@ class Resource( object ):
       return role
          
          
-   def GET( self, *args ):
+   def GET( self, *args, **kwargs ):
       print "%s with args: %s" % ( "GET", args )
       cherrypy.response.headers[ "Content-Type" ] = "application/json"
       role = self.getRole()
@@ -119,7 +124,9 @@ class Resource( object ):
          if item :
             return item
       else :
-         item = db.allItems()
+         idPrefix = "p" in kwargs and kwargs[ "p" ] or None
+         searchPattern = "q" in kwargs and kwargs[ "q" ] or None
+         item = db.allItems( role, idPrefix, searchPattern )
          if item : 
             return item
       cherrypy.response.status = 500

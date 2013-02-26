@@ -147,6 +147,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
 
       function Customer( id ) {
          Document.call( this, id, Customer.idPrefix );
+         this.books = {};
       }
       
       _.extend( Customer.prototype, Document.prototype );
@@ -154,30 +155,40 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       Customer.idPrefix = "customer-";
       
       Customer.prototype.addBook = function( bookId ) {
-         if( !this.books ) {
-            this.books = {};
+         if( ! this.hasBook( bookId ) ) {
+            this.books[ bookId ] = bookId;
          }
-         this.books[ bookId ] = bookId;
       };
 
-      
       Customer.prototype.removeBook = function( bookId ) {
-         if( customerHasBook( this, bookId ) ) {
+         if( this.hasBook( bookId ) ) {
             delete this.books[ bookId ];
          }
       };
 
       
       Customer.prototype.hasBook = function( bookId ) {
-         if( !this.books ) {
-            return false;
-         }
          return bookId in this.books;
       };
       
       
       Customer.prototype.changeBarcode = function( barcode ) {
          
+      };
+      
+      Customer.prototype.getBooks = function() {
+         var self = this;
+         var bookPromises = [];
+         if( !self.books || self.books.length == 0 ) {
+            return q.when( null );
+         }
+         console.log( self.books );
+         for( var bookId in self.books ) {
+            var bookDocument = new Book( bookId ).get();
+            bookPromises.push( bookDocument );
+         }
+         
+         return q.all( bookPromises );
       };
       
       ////////////////////////////////////////////////////////////////////////////////////////////////////

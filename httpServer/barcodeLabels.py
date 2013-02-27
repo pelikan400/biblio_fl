@@ -564,7 +564,7 @@ class Label( object ) :
         textY = centerY + self.barHeight / 2 + cmToPoints( 0.5 )
         textEndX = self.showText( centerX, textY, text, textSize = 12 )
         if labelNote :
-            self.showText( textEndX + cmToPoints( 0.4 ), textY, labelNote, textSize = 5, align = "left" )
+            self.showText( textEndX + cmToPoints( 0.4 ), textY, labelNote, textSize = 6, align = "left" )
 
 
     def drawBorders( self, x, y ) :

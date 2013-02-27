@@ -21,14 +21,14 @@ define( function() {
          "type" : "PUPIL"
       }
    ];
-   
- var books = [
-{"publisher": "List", "title": "Artemis Fowl - Bd.2-Die Verschwörung", "author": "Colfer, Eoin", "barcode": "100458", "signature": "FA-Col"} ,
-{"publisher": "Thienemann", "title": "Jim Knopf und Lukas der Lokomotivführer", "author": "Ende, Michael", "barcode": "100496", "signature": "FA-End"} ,
-{"publisher": "Thienemann", "title": "Die unendliche Geschichte", "author": "Ende, Michael", "barcode": "100502", "signature": "FA-End"} ,
-{"publisher": "C. Bange", "title": "Draußen vor der Tür und ausgewählte Kurzgeschichten, Erläuterungen", "author": "Borchert, Wolfgang", "barcode": "122290", "signature": "D - Bor"}
+
+   var books = [
+{"donationCertificate": "", "publisher": "Xenos", "barcode": "100403", "isbn": "4-007204-840131", "author": "Madee, Barbara", "antolin": "", "title": "Das große Bibi-Blocksberg Buch", "tags": "Hexen / Zauberer", "donation": "", "signature": "A 001"} ,
+{"donationCertificate": "", "publisher": "Oetinger", "barcode": "100410", "isbn": "3-7891-1954-7", "author": "Maar, Paul", "antolin": "ab Kl. 4", "title": "Am Samstag kam das Sams zurück", "tags": "Sams", "donation": "", "signature": "A 002"} ,
+{"donationCertificate": "", "publisher": "Meyer", "barcode": "100427", "isbn": "", "author": "Naoura,Salah", "antolin": "", "title": "Die Geschichte einer Stadt", "tags": "Städte", "donation": "", "signature": "A 003"} ,
+{"donationCertificate": "", "publisher": "Herold", "barcode": "100434", "isbn": "3-7767-0412-8", "author": "Kaut, Ellis ", "antolin": "", "title": "Pumukel auf heißer Spur", "tags": "", "donation": "", "signature": "A 004"} ,
+{"donationCertificate": "", "publisher": "Karussel", "barcode": "100441", "isbn": "", "author": "Blyton, Enid", "antolin": "ab Kl. 5", "title": "Abenteuer", "tags": "Krimi", "donation": "", "signature": "A 005"} ,
 ];
-   
    
    return {
       customers : customers,

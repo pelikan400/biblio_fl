@@ -21,7 +21,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          customers.forEach( function( customer ) {
             customer.id = "customer-barcode-" + customer.barcode;
             customer.schoolClass = "1a";
-            customer.docType = "PATRON";
+            customer.docType = "CUSTOMER";
             customer.maximumIssues = 1;
             customerPromises.push( db.putDocument( customer.id, customer )
                .then( function( item ) {
@@ -84,7 +84,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       function inherit( Child, Parent ) {
          _.extend( Child.prototype, Parent.prototype );
       }
-      
+     
       ////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function Document( id, idPrefix )
@@ -106,8 +106,8 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          self = this;
          return db.getDocument( self.id )
          .then( function( doc ) { 
-            console.log( "Document.get returned with:" );
-            console.log( doc );
+            // console.log( "Document.get returned with:" );
+            // console.log( doc );
             if( doc ) {
                _.extend( self, doc );
                return self;
@@ -122,8 +122,8 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          self = this;
          return db.putDocument( self.id, self )
          .then( function( doc ) { 
-            console.log( "Document.put returned with:" );
-            console.log( doc );
+            // console.log( "Document.put returned with:" );
+            // console.log( doc );
             if( doc ) {
                _.extend( self, doc );
                return self;
@@ -177,18 +177,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       };
       
       Customer.prototype.getBooks = function() {
-         var self = this;
-         var bookPromises = [];
-         if( !self.books || self.books.length == 0 ) {
-            return q.when( null );
-         }
-         console.log( self.books );
-         for( var bookId in self.books ) {
-            var bookDocument = new Book( bookId ).get();
-            bookPromises.push( bookDocument );
-         }
-         
-         return q.all( bookPromises );
+        return getDocumentsByIdList( Book, self.books ? self.books.keys() : null );
       };
       
       ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,7 +267,22 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          return deferred.promise;
       };
 
-      
+
+      var getDocumentsByIdList = function( Klass, idList ) {
+         var docPromises = [];
+         if( !idList || idList.length == 0 ) {
+            return q.when( null );
+         }
+
+         idList.forEach( function( id ) {
+            var document = new Klass( id ).get();
+            docPromises.push( document );
+         });
+
+         return q.all( docPromises );
+      };
+
+
       var importDummyData = function() {
          dummyData.customers.forEach( function( item ) {
             var customer = new Customer();
@@ -305,12 +309,16 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          getDocument : getDocument,
          scanDocuments : scanDocuments,
          getAllDocuments: getAllDocuments,
+         getDocumentsByIdList : getDocumentsByIdList,
          
          scanBooks : function( searchText ) {
             return scanDocuments( Book, searchText );
          },
          getAllBooks : function() {  
             return getAllDocuments( Book );
+         },
+         getBookById: function( id ) {
+              return new Book( id ).get();
          },
          getBookByBarcode : function( bookBarcode ) {
             return getDocumentByBarcode( Book, bookBarcode );
@@ -322,6 +330,9 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          },
          getAllCustomers : function() {  
             return getAllDocuments( Customer );
+         },
+         getCustomerById: function( id ) {
+              return new Customer( id ).get();
          },
          getCustomerByBarcode : function( customerBarcode ) {
             return getDocumentByBarcode( Customer, customerBarcode );

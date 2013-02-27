@@ -1,6 +1,6 @@
 import cherrypy
 import anydbm
-import traceback
+# import traceback
 
 ##############################################################################################################
 
@@ -127,7 +127,7 @@ class Resource( object ):
          item = db.getItem( role, itemKey )
          if item :
             print "GET: data: %s" % item
-            traceback.print_stack()
+            # traceback.print_stack()
             return item.encode( "UTF-8" )
       else :
          idPrefix = "p" in kwargs and kwargs[ "p" ] or None

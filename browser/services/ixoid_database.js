@@ -177,7 +177,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       };
       
       Customer.prototype.getBooks = function() {
-        return getDocumentsByIdList( Book, self.books ? self.books.keys() : null );
+        return getDocumentsByIdMap( Book, self.books );
       };
       
       ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,6 +278,21 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             var document = new Klass( id ).get();
             docPromises.push( document );
          });
+
+         return q.all( docPromises );
+      };
+
+
+      var getDocumentsByIdMap = function( Klass, idMap ) {
+         var docPromises = [];
+         if( !idMap ) {
+            return q.when( null );
+         }
+
+         for( var id in idMap ) {
+            var document = new Klass( id ).get();
+            docPromises.push( document );
+         };
 
          return q.all( docPromises );
       };

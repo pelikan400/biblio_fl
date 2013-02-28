@@ -11,12 +11,12 @@ define( function() {
         var code = c.charCodeAt( 0 );
         var code0 = "0".charCodeAt( 0 );
         var code9 = String( "9" ).charCodeAt( 0 );
-        return code >= 0 && code <= code9;
+        return code >= code0 && code <= code9;
     }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    var controller = [ '$scope', "ixoidDatabase", function BookLoansController( $scope, db ) {
+    var controller = [ '$scope', "ixoidDatabase", "$q", function BookLoansController( $scope, db, q ) {
         $scope.searchedBooks = null;
         $scope.issuedBooks = null;
         $scope.customer = null;
@@ -39,7 +39,7 @@ define( function() {
             console.log( "fetch new book list: no customer checked in" );
             $scope.issuedBooks = null;
           }
-        }
+        };
 
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,13 +88,23 @@ define( function() {
              }
              
              book.issuedStatus = "ISSUED";
-             db.getCustomerById( book.issuedBy )
-             .then( function( customer ) {
-                 console.log( "remove book from old customer" );
-                 customer.removeBook( book.id );
-                 console.log( "save old customer" );
-                 return customer.put();
-             })
+             var saveOldCustomer = function( oldCustomer ) {
+                if( book.issuedBy ) {
+                   db.getCustomerById( oldCustomer )
+                   .then( function( customer ) {
+                       console.log( "remove book from old customer" );
+                       customer.removeBook( book.id );
+                       console.log( "save old customer" );
+                       return customer.put();
+                   });
+                }
+                else {
+                   console.log( "can not find old customer: " );
+                   return q.when( null );
+                }
+             };
+             
+             saveOldCustomer( book.issuedBy )
              .then( function() {
                  console.log( "save book" );
                  book.issuedBy = $scope.customer.id;

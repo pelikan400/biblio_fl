@@ -1,0 +1,60 @@
+<div class="row">
+   <div class="span5">
+      <form ng-submit="parseGeneralInput()">
+         <input class="input-xlarge" type="text" ng-model="generalInputText">
+      </form>
+   </div>
+   <div class="span7" ng-show="customer">
+      <p><span class="label label-info">{{ customer.barcode }}</span> <span class="label">{{ customer.firstName }} {{ customer.lastName }} </span><i class="icon-edit"></i></p>
+   </div>
+</div>
+
+<hr/>
+
+     <div class="row">
+     	<h4 ng-show="customer">
+     		Kunde: <span class="label label-info">{{
+     			customer.barcode }}</span> <span class="label">{{
+     			customer.firstName }} {{ customer.lastName }} </span><i class="icon-edit"></i>
+     	</h4>
+        <hr/>
+     </div>
+
+<hr/>
+
+<div class="row">
+   <div class="span5">
+      <div ng-repeat="book in issuedBooks"> 
+         <div><p>
+         <span ng-switch on="book.issuedStatus">
+            <span ng-switch-when="RETURNED" class="label label-success">{{book.barcode}}<i class="icon-ok"></i> </span>
+            <span ng-switch-when="ISSUED" class="label label-important">{{book.barcode}}<i class="icon-share"></i></span>
+         </span>
+          <span>{{book.title}}</span>
+          <i class="icon-edit"></i>
+         </p></div>
+      </div>
+   </div>
+</div>
+
+<hr/>
+
+<div class="row" data-ng-show="searchedBooks">
+  <h4>Büchersuche</h4>
+   <div class="span5">
+      <div ng-repeat="book in searchedBooks"> 
+         <div><p>
+          <span>{{book.title}}</span>
+         </p></div>
+      </div>
+   </div>
+</div>
+
+<hr/>
+
+<div class="row">
+   <h4>
+      Buchungen 
+   </h4>
+</div>
+

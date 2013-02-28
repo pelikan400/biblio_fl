@@ -1,9 +1,9 @@
 define( function() {
    'use strict';
 
-    var controller = [ '$scope', "ixoidDatabase", function BooksController( $scope, db ) {
-        console.log( "BooksController initialized." );
-        $scope.$root.activeMenuId = "books";
+    var controller = [ '$scope', "ixoidDatabase", function AdministrationController( $scope, db ) {
+        console.log( "AdministrationController initialized." );
+        $scope.$root.activeMenuId = "administration";
 
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -13,8 +13,8 @@ define( function() {
 
    return {
       registerExports: function( angularModule ) {
-         console.log( "BooksController registered." );
-         angularModule.controller( 'BooksController', controller );
+         console.log( "AdministrationController registered." );
+         angularModule.controller( 'AdministrationController', controller );
       }
    };
 } );

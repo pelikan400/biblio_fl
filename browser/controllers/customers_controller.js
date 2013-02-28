@@ -7,6 +7,10 @@ define( function() {
       $scope.editablePatron = null;
       console.log( "PatronsController initialized." );
       
+        $scope.$root.activeMenuId = "customers";
+
+
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////////
       $scope.editPatron = function () {
         console.log( "Hey we got a first call to editPatron" ); 
       };
@@ -16,8 +20,8 @@ define( function() {
 
    return {
       registerExports: function( angularModule ) {
-         console.log( "PatronsController registered." );
-         angularModule.controller( 'PatronsController', controller );
+         console.log( "CustomersController registered." );
+         angularModule.controller( 'CustomersController', controller );
       }
    };
 } );

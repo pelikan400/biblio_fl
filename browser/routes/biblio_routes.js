@@ -2,23 +2,30 @@
    
 define( [], function() {
    var configuration = [ "$routeProvider", "$locationProvider", function( $routeProvider, $locationProvider ) {
-      $routeProvider.when('#customers', {
-         templateUrl: 'views/customers.html'
-         // controller: ChapterCntl
+      $routeProvider.when('/issues', {
+        templateUrl: 'views/issues.html',
+        controller: 'BookLoansController'
+      });
+
+      $routeProvider.when('/books', {
+        templateUrl: 'views/books.html',
+        controller: 'BooksController'
       });
  
-      $routeProvider.when('#books', {
-         templateUrl: 'views/books.html'
-         // controller: ChapterCntl
+      $routeProvider.when('/customers', {
+        templateUrl: 'views/customers.html',
+        controller: 'CustomersController'
       });
  
-      $routeProvider.when('#issues', {
-         templateUrl: 'views/issues.html'
-         // controller: ChapterCntl
+      $routeProvider.when('/administration', {
+        templateUrl: 'views/administration.html',
+        controller: 'AdministrationController'
       });
  
+      $routeProvider.otherwise({ redirectTo: '/issues' } ); 
+
       // configure html5 to get links working on jsfiddle
-      $locationProvider.html5Mode(true);
+      // $locationProvider.html5Mode(true);
    }];
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -6,86 +6,26 @@
 
       <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
       <link rel="stylesheet" href="application.css">
-    
 </head>
 <body>
 
-<div class="container"  data-ng-controller="BookLoansController">
+<div class="container" data-ng-controller="ApplicationController">
    <div class="navbar">
      <div class="navbar-inner">
        <a class="brand" href="#">Biblio FL</a>
-       <ul class="nav">
-         <li class="active"><a href="#circulation">Ausleihen</a></li>
-         <li><a href="#books">Bücher</a></li>
-         <li><a href="#customers">Kunden</a></li>
-         <li><a href="#adminstration">Administration</a></li>
+       <ul class="nav" data-ng-repeat="menu in mainMenu">
+         <li data-ng-class="{ active: menu.id == activeMenuId, dropdown: menu.submenu}">
+           <a href="{{menu.href}}" data-ng-class="{ 'dropdown-toggle' : 'Hello'}">{{menu.name}}</a>
+           <ul class="dropdown-menu" data-ng-show="menu.submenu" data-ng-repeat="submenu in menu.submenu">
+             <li><a href="{{submenu.href}}">{{submenu.name}}</a>
+           </ul>
+         </li>
        </ul>
      </div>
    </div>
 
    <div class="row">
-      <div class="span5">
-         <form ng-submit="parseGeneralInput()">
-            <input class="input-xlarge" type="text" ng-model="generalInputText">
-         </form>
-      </div>
-      <div class="span7" ng-show="customer">
-         <p><span class="label label-info">{{ customer.barcode }}</span> <span class="label">{{ customer.firstName }} {{ customer.lastName }} </span><i class="icon-edit"></i></p>
-      </div>
-   </div>
-
-   <hr/>
-
-	<div class="row">
-		<h4 ng-show="customer">
-			Kunde: <span class="label label-info">{{
-				customer.barcode }}</span> <span class="label">{{
-				customer.firstName }} {{ customer.lastName }} </span><i class="icon-edit"></i>
-		</h4>
-	</div>
-
-	<hr/>
-
-   <div class="row">
-      <h4>
-         Buchungen <span class="label label-info">{{
-            customer.barcode }}</span> <span class="label">{{
-            customer.firstName }} {{ customer.lastName }} </span><i class="icon-edit"></i>
-      </h4>
-   </div>
-
-<div class="row">
-   <div class="span7">
-      <form action="http://www.ixoid.de:8080/barcode">
-         <textarea rows="10" cols="80" name="labels"></textarea>
-         <button type="submit" value="OK1">OK</button>
-      </form>
-   </div>
-</div>
-
-
-
-
-
-   <div class="row">
-      <div class="span5">
-         <div ng-repeat="book in issuedBooks"> 
-            <div><p>
-            <span ng-switch on="book.issuedStatus">
-               <span ng-switch-when="RETURNED" class="label label-success">{{book.barcode}}<i class="icon-ok"></i> </span>
-               <span ng-switch-when="ISSUED" class="label label-important">{{book.barcode}}<i class="icon-share"></i></span>
-            </span>
-             <span>{{book.title}}</span>
-             <i class="icon-edit"></i>
-            </p></div>
-         </div>
-      </div>
-   </div>
-
-		<div class="row">
-      <div class="span12">
-         <div data-ng-view></div>
-      </div>
+     <div data-ng-view class="span12"></div>
    </div>
 </div>
 

@@ -9,6 +9,29 @@ define( [ "underscore" ], function( _ ) {
    }
 
    
+   RestDB.prototype.scanDocuments = function( idPrefix, searchText ) {
+      var url = this.databaseUrl;
+      var firstQueryParameter = true;
+      if( idPrefix ) {
+          url += ( firstQueryParameter ? "?" : "&" ) + "p=" + idPrefix;
+          firstQueryParameter = false;
+      }
+      if( searchText ) {
+          url += ( firstQueryParameter ? "?" : "&" ) + "q=" + searchText;
+          firstQueryParameter = false;
+      }
+
+      return this.$http( { method: "GET", url: url } )
+      .then( function( response ) {
+         console.log( "GET response is: " );
+         console.log( response.data );
+          return response.data;
+      }, function( error ) {
+         console.log( "GET returned with error; returning null" );
+         return null;
+      });
+   };
+   
    RestDB.prototype.getDocument = function( id ) {
       var url = this.databaseUrl + "/" + id;
       return this.$http( { method: "GET", url: url } )

@@ -1,27 +1,23 @@
 'use strict';
 
 define( function() {
-
-   // TODO we need access to database of books, customers, and circulations
-   
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    function isDigit( c )
-    {
-        var code = c.charCodeAt( 0 );
-        var code0 = "0".charCodeAt( 0 );
-        var code9 = String( "9" ).charCodeAt( 0 );
-        return code >= code0 && code <= code9;
-    }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     var controller = [ '$scope', "ixoidDatabase", "$q", function BookLoansController( $scope, db, q ) {
         $scope.searchedBooks = null;
         $scope.issuedBooks = null;
         $scope.customer = null;
         $scope.generalInputText = "";
         console.log( "BookLoansController initialized." );
+        $scope.$root.activeMenuId = "issues";
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        var isDigit = function( c )
+        {
+          var code = c.charCodeAt( 0 );
+          var code0 = "0".charCodeAt( 0 );
+          var code9 = String( "9" ).charCodeAt( 0 );
+          return code >= code0 && code <= code9;
+        }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -47,12 +43,7 @@ define( function() {
         var processBook = function ( book ) {
           console.log( "book id:" + book.id );
           console.log( "issued by: " + book.issuedBy );
-          if( ( ! $scope.customer ) && ( ! book.issuedStatus || book.issuedStatus == "RETURNED" ) ){
-            console.log( "no customer logged in and book RETURNED or never issued" );
-            // no customer logged so there is no destination 
-            // TODO: show the book details in searchedBooks 
-            return null;
-          } else if( book.issuedStatus == "ISSUED"  ) {
+          if( book.issuedStatus == "ISSUED"  ) {
             console.log( "book is ISSUED will be RETURNED" );
              // book was ISSUED and is returned now 
              // change the logged in customer to the one specified on the book
@@ -60,7 +51,7 @@ define( function() {
              book.put()
              .then( function( book ) {
                  // TODO: check for errors or database updates
-                 if( book.issuedBy != $scope.customer.id ) {
+                 if( !$scope.customer || book.issuedBy != $scope.customer.id ) {
                    console.log( "get the customer who ISSUED the book" );
                    return db.getCustomerById( book.issuedBy )
                      .then( function( customer ) {
@@ -76,8 +67,15 @@ define( function() {
              .then( function() {
                  fetchIssuedBooks();
              });
-           } else {
-             console.log( "book is RETURNED will be ISSUED" );
+          } 
+          else if( ! $scope.customer ){
+            console.log( "no customer logged in and book is NOT ISSUED" );
+            // no customer logged so there is no destination 
+            // TODO: show the book details in searchedBooks 
+            return null;
+          } 
+          else {
+             console.log( "book is RETURNED and will be ISSUED" );
              console.log( "checked in customer id: " + $scope.customer.id );
              // one customer is logged in, book was RETURNED and will be ISSUED
              if( book.issuedBy == $scope.customer.id ) {
@@ -90,7 +88,7 @@ define( function() {
              book.issuedStatus = "ISSUED";
              var saveOldCustomer = function( oldCustomer ) {
                 if( book.issuedBy ) {
-                   db.getCustomerById( oldCustomer )
+                   return db.getCustomerById( oldCustomer )
                    .then( function( customer ) {
                        console.log( "remove book from old customer" );
                        customer.removeBook( book.id );
@@ -119,13 +117,15 @@ define( function() {
              .then( function() {
                  return fetchIssuedBooks();
                });
-           }
+          }
         };
 
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        // TODO: put focus on generalInputText ?
         $scope.parseGeneralInput = function () {
            console.log( "Input is: '" + $scope.generalInputText + "'" );
+           console.log( "$scope is: " );
+           console.log( $scope );
             // console.log( "Import dummy data" );
             // db.importDummyData();
             var text = $scope.generalInputText;
@@ -150,10 +150,15 @@ define( function() {
                    });
                };
             } else {
-                if( text.charAt( 0 ) == "?" ) {
-                    text = text.substring( 1 ).trim();
-                }
-                console.log( "Text search: '" + text + "'" );
+              text = text.trim();
+              console.log( "Text search: '" + text + "'" );
+              if( text.length < 3 ) {
+                return;
+              }
+              db.scanBooks( text ) 
+              .then( function( books ) { 
+                  $scope.searchedBooks = books;
+              });
             }
 
             $scope.generalInputText = "";

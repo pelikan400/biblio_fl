@@ -1,17 +1,22 @@
 'use strict';
 
-define( [ './controllers/books_controller', './controllers/patrons_controller', './controllers/book_loans_controller', './services/ixoid_database', './routes/biblio_routes' ], 
-   function application( booksController, patronsController, bookLoansController, ixoidDatabase, biblioRoutes ) {
+define( [ './controllers/application_controller', './controllers/books_controller', 
+          './controllers/customers_controller', './controllers/book_loans_controller', 
+          './controllers/administration_controller', 
+          './services/ixoid_database', './routes/biblio_routes' ], 
+  function application( applicationController, booksController, 
+                        customersController, bookLoansController, 
+                        administrationController, 
+                        ixoidDatabase, biblioRoutes ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+   var functionArguments = Array.prototype.slice.call( arguments, 0 );
    return {
       importInto: function( angularHostModule ) {
-           [ booksController, patronsController, bookLoansController, ixoidDatabase, biblioRoutes ].forEach( function( module ) {
-            console.log( module );
+         functionArguments.forEach( function( module ) {
             module.registerExports( angularHostModule );
          } );
-
       }
    };
 } );

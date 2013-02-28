@@ -103,7 +103,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       
       Document.prototype.get = function() {
          // TODO: where do we hold the meta informations, like etag
-         self = this;
+         var self = this;
          return db.getDocument( self.id )
          .then( function( doc ) { 
             // console.log( "Document.get returned with:" );
@@ -119,7 +119,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       
       
       Document.prototype.put = function() {
-         self = this;
+         var self = this;
          return db.putDocument( self.id, self )
          .then( function( doc ) { 
             // console.log( "Document.put returned with:" );
@@ -177,7 +177,9 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       };
       
       Customer.prototype.getBooks = function() {
-        return getDocumentsByIdMap( Book, self.books );
+        console.log( "getBooks for bookId map:" );
+        console.log( this.books );
+        return getDocumentsByIdMap( Book, this.books );
       };
       
       ////////////////////////////////////////////////////////////////////////////////////////////////////

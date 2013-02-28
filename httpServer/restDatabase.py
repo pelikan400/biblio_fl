@@ -68,7 +68,7 @@ class BerkeleyDB:
       return None
 
    def allItems( self, role, idPrefix, searchPattern ) :
-      data = "{ "
+      data = "[ "
       first = True
       for key, valueAscii in self.db.iteritems() :
          value = unicode( valueAscii, "UTF-8" )
@@ -82,9 +82,9 @@ class BerkeleyDB:
             first = False
          else :
             data += ","
-         data += '"%s" : %s' % ( key, value )
+         data += '%s' % value
          pass
-      data += " }"
+      data += " ]"
       return data
 
    # TODO implement scan

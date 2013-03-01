@@ -1,12 +1,25 @@
-<div ng-controller="PatronsController">
-   <form ng-submit="editPatron()">
-      <div class="row">
-         <h3>Neue Kundin</h3>
-      </div>
+<h3>Kundin anlegen / ändern</h3>
+<form class="form-horizontal" ng-submit="editCustomer()">
+  <div class="control-group">
+    <label  class="control-label">Vorname</label>
+    <div class="controls">
+      <input type="hidden" ng-model="editableCustomer.id" />
+      <input type="text" class="input-xlarge" ng-model="editableCustomer.firstName" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label  class="control-label">Nachname</label>
+    <div class="controls">
+      <input type="text" class="input-xlarge" ng-model="editableCustomer.firstName" />
+    </div>
+  </div>
+
+
       <hr/>
       <div class="controls controls-row">
-         <input class="span3" type="text" ng-model="editablePatron.firstName" placeholder="Vorname">
-         <input class="span3" type="text" ng-model="editablePatron.lastName" placeholder="Nachname">
+         <input class="span3" type="text" ng-model="editableCustomer.firstName" placeholder="Vorname">
+         <input class="span3" type="text" ng-model="editableCustomer.lastName" placeholder="Nachname">
       </div>
       <div class="controls controls-row">
          <select class="span3" ng-model="type">
@@ -49,5 +62,3 @@
          </div>
       </div>
    </form>
-</div>
-

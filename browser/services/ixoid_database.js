@@ -14,44 +14,8 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       // create, update, read, erase (delete is reserved)
       // book, 
       // document based
-      var db = dbm.db( $http, "/db" );
-      
-      var dumpDummyDataIntoDatabase = function() {
-         var customerPromises = [];
-         customers.forEach( function( customer ) {
-            customer.id = "customer-barcode-" + customer.barcode;
-            customer.schoolClass = "1a";
-            customer.docType = "CUSTOMER";
-            customer.maximumIssues = 1;
-            customerPromises.push( db.putDocument( customer.id, customer )
-               .then( function( item ) {
-                  console.log( "PUT succeeded" );
-                  console.log( item );
-               }) 
-            );
-         });
-         q.all( customerPromises ) 
-         .then( function( result ) {
-            console.log( "All PUT's succeeded" );
-         });
 
-         var bookPromises = [];
-         books.forEach( function( book ) {
-            book.id = "book-barcode-" + book.barcode;
-            book.docType = "BOOK";
-            bookPromises.push( db.putDocument( book.id, book )
-               .then( function( item ) {
-                  console.log( "PUT succeeded" );
-                  console.log( item );
-               }) 
-            );
-         });
-         q.all( bookPromises ) 
-         .then( function( result ) {
-            console.log( "All PUT's succeeded" );
-         });
-      };
-      
+      var db = dbm.db( $http, "/db" );
       
        // TODO: 
        // - implement conditional PUT (use ETag)
@@ -142,8 +106,8 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       _.extend( Book.prototype, Document.prototype );
       
       Book.idPrefix = "book-";
-      
-      ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function Customer( id ) {
          Document.call( this, id, Customer.idPrefix );
@@ -181,7 +145,19 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
         console.log( this.books );
         return getDocumentsByIdMap( Book, this.books );
       };
+
       
+      Customer.prototype.schoolClassMap = {
+          "2009a" : "4a",
+          "2009b" : "4b",
+          "2010a" : "3a",
+          "2010b" : "3b",
+          "2011a" : "2a",
+          "2011b" : "2b",
+          "2012a" : "1a",
+          "2012b" : "1b"
+      };
+
       ////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function Barcode( barcode ) {
@@ -334,6 +310,9 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          getAllBooks : function() {  
             return getAllDocuments( Book );
          },
+         createBook: function() {
+              return new Book();
+         },
          getBookById: function( id ) {
               return new Book( id ).get();
          },
@@ -348,6 +327,9 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          getAllCustomers : function() {  
             return getAllDocuments( Customer );
          },
+         createCustomer: function() {
+              return new Customer();
+         },
          getCustomerById: function( id ) {
               return new Customer( id ).get();
          },
@@ -355,6 +337,15 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             return getDocumentByBarcode( Customer, customerBarcode );
          },
          
+
+         createBarcode : function( barcode, referenceId ) {
+              var b = new Barcode( barcode );
+              b.reference = referenceId;
+              return b;
+         },
+         getBarcodeByBarcode: function( barcode ) {
+              return new Barcode( barcode ).get();
+         } 
          
          // getIssuedBooksByCustomer: function( customer ) {
          //    var deferred = q.defer();

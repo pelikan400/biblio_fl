@@ -2,12 +2,13 @@
 
 define( function() {
     var controller = [ '$scope', "ixoidDatabase", "$q", function BookLoansController( $scope, db, q ) {
+        // console.log( "BookLoansController initialized." );
+        $scope.$root.activeMenuId = "issues";
+
         $scope.searchedBooks = null;
         $scope.issuedBooks = null;
         $scope.customer = null;
         $scope.generalInputText = "";
-        console.log( "BookLoansController initialized." );
-        $scope.$root.activeMenuId = "issues";
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         

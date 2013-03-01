@@ -7,13 +7,23 @@ define( [], function() {
         controller: 'BookLoansController'
       });
 
-      $routeProvider.when('/books', {
-        templateUrl: 'views/books.html',
+      $routeProvider.when('/books/:action', {
+        templateUrl: 'views/book_edit.html',
         controller: 'BooksController'
       });
  
-      $routeProvider.when('/customers', {
-        templateUrl: 'views/customers.html',
+      $routeProvider.when('/books/:action/:bookId', {
+        templateUrl: 'views/book_edit.html',
+        controller: 'BooksController'
+      });
+ 
+      $routeProvider.when('/customers/:action', {
+        templateUrl: 'views/customer_edit.html',
+        controller: 'CustomersController'
+      });
+ 
+      $routeProvider.when('/customers/:action/:customerId', {
+        templateUrl: 'views/customer_edit.html',
         controller: 'CustomersController'
       });
  

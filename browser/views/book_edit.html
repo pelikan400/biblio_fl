@@ -1,6 +1,6 @@
-<h4>Buch ändern / Neues Buch anlegen</h4>
+<h4>Buch anlegen / ändern</h4>
 
-<form class="form-horizontal" action="">
+<form class="form-horizontal" data-ng-submit="saveBook()">
   <div class="control-group">
     <label  class="control-label">Autor</label>
     <div class="controls">
@@ -70,13 +70,16 @@
   </div>
 
   <div class="control-group">
+    <label class="control-label">Notizen</label>
     <div class="controls">
-      <button type="submit" class="btn" data-ng-submit="createOrEditBook()" data-ng-show="editableBook.id">Ändern</button>
-      <button type="submit" class="btn" data-ng-submit="createOrEditBook()" data-ng-hide="editableBook.id">Neu anlegen</button>
+      <textarea rows="4" class="input-xlarge"
+	     ng-model="editableBook.notes" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <div class="controls">
+      <button type="submit" class="btn" data-ng-submit="saveBook()">Speichern</button>
     </div>
   </div>
 </form>
-
-<div class="row">
-  <div class="span12"></div>
-</div>

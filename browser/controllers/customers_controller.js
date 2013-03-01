@@ -3,16 +3,15 @@ define( function() {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   var controller = [ '$scope', "ixoidDatabase", function PatronsController( $scope, db ) {
-      $scope.editablePatron = null;
-      console.log( "PatronsController initialized." );
-      
-        $scope.$root.activeMenuId = "customers";
+   var controller = [ '$scope', "ixoidDatabase", function CustomersController( $scope, db ) {
+      // console.log( "CustomersController initialized." );
+      $scope.$root.activeMenuId = "customers";
 
+      $scope.editableCustomer = null;
 
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-      $scope.editPatron = function () {
-        console.log( "Hey we got a first call to editPatron" ); 
+      $scope.editCustomer = function () {
+        console.log( "Hey we got a first call to editCustomer" ); 
       };
    } ];
 

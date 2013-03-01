@@ -1,5 +1,74 @@
-<div class="row">
-	<div class="span12">
-	<h1>Books</h1>
+<h1>Books</h1>
+
+<form class="form-horizontal" action="">
+	<div class="control-group">
+      <label  class="control-label">Autor</label>
+		<div class="controls">
+			<input type="text" ng-model="editableBook.author" />
+		</div>
 	</div>
+	<div class="control-group">
+         <label class="control-label">Titel</label>
+		<div class="controls">
+			<input type="text" ng-model="editableBook.title" />
+		</div>
+	</div>
+	<div class="control-group">
+         <label class="control-label">Verlag</label>
+		<div class="controls">
+			<input type="text" ng-model="editableBook.publisher" />
+		</div>
+	</div>
+	<div class="control-group">
+         <label class="control-label"></label>
+		<div class="controls">
+			<input type="text" ng-model="signature" />
+		</div>
+	</div>
+	<div class="control-group">
+      <label class="control-label"></label>
+		<div class="controls">
+			<input type="text" 
+				ng-model="editableBook.tags" />
+		</div>
+	</div>
+	<div class="control-group">
+      <label class="control-label"></label>
+		<div class="controls">
+         <input type="text" 
+				ng-model="editableBook.isbn" />
+		</div>
+	</div>
+	<div class="control-group">
+      <label class="control-label"></label>
+		<div class="controls">
+         <input type="text" 
+				ng-model="editableBook.antolin" />
+		</div>
+	</div>
+	<div class="control-group">
+      <label class="control-label"></label>
+		<div class="controls">
+         <input type="text" 
+				ng-model="editableBook.donation" />
+		</div>
+	</div>
+	<div class="control-group">
+      <label class="control-label"></label>
+		<div class="controls">
+         <input type="text" 
+				ng-model="editableBook.donationCertificate" />
+		</div>
+	</div>
+	<div class="control-group">
+      <label class="control-label"></label>
+		<div class="controls">
+         <input type="text" 
+				ng-model="editableBook.barcode" />
+		</div>
+	</div>
+</form>
+
+<div class="row">
+	<div class="span12"></div>
 </div>

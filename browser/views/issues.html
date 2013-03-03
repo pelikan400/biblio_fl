@@ -8,10 +8,19 @@
 	</form>
 </div>
 
+
+<div class="row customerTable" ng-show="customer">
+<div class="span12">
+   <p><a href="#/customers/edit/{{customer.id}}">{{customer.firstName}} {{customer.lastName}}</a></p>
+   <p>Klasse: {{customer.schoolClass}}</p>
+   <p>{{customer.notes}}</p>
+</div>
+</div>
+
+
 <div class="row" ng-show="customer">
 	<h4>
-		Von  <a href="#/customers/edit/{{customer.id}}"><span class="label">{{ customer.firstName }} {{
-			customer.lastName }}</span></a> ausgeliehene Bücher
+		Ausgeliehene Bücher
 	</h4>
 	<div class="span12 bookTableIssued">
 		<table class="table table-hover">
@@ -43,8 +52,7 @@
 
 <div class="row"  ng-show="customer">
 	<h4>
-		Von <a href="#/customers/edit/{{customer.id}}"><span class="label">{{ customer.firstName }} {{
-         customer.lastName }}</span></a> zurückgebrachte Bücher
+		Zurückgebrachte Bücher
 	</h4>
    <div class="span12 bookTableReturned">
       <table class="table table-hover">
@@ -65,7 +73,7 @@
                <td>{{book.signature}}</td>
                <td>{{book.returnDate.asGermanDate()}}</td>
                <td>{{book.notes}}</td>
-               <td><a href="#/books/edit/{{book.id}}"><i class="icon-pencil"></i></a></td>
+               <td><a href="#/books/edit/{{book.id}}"> <button class="btn"><i class="icon-book"></i></button></a></td>
             </tr>
          </tbody>
       </table>
@@ -95,7 +103,7 @@
                <td><span data-ng-click="checkInCustomer( $index )">{{customer.firstName}} {{customer.lastName}}</span></td>
                <td>{{customer.notes}}</td>
                <td>{{customer.barcode}}</td>
-               <td><button class="btn" data-ng-click="checkInCustomer( $index )"><i class="icon-pencil"></i></button></td>
+               <td><button class="btn" data-ng-click="checkInCustomer( $index )"><i class="icon-user"></i></button></td>
             </tr>
          </tbody>
       </table>
@@ -129,7 +137,7 @@
                <td>{{book.dueDate.asGermanDate()}}</td>
                <td>{{book.notes}}</td>
                <td>{{book.barcode}}</td>
-               <td><a href="#/books/edit/{{book.id}}"><i class="icon-pencil"></i></a></td>
+               <td><a href="#/books/edit/{{book.id}}"><i class="icon-book"></i></a></td>
             </tr>
          </tbody>
       </table>

@@ -1,7 +1,7 @@
 'use strict';
 
 define( [ "jquery" ], function( jquery ) {
-   var controller = [ '$scope', "$routeParams", "ixoidDatabase", "$q", function BookLoansController( $scope, $routeParams, db, q ) {
+   var controller = [ '$scope', "$routeParams", "$location", "ixoidDatabase", "$q", function BookLoansController( $scope, $routeParams, $location, db, q ) {
       console.log( "BookLoansController initialized." );
       $scope.$root.activeMenuId = "issues";
 
@@ -16,8 +16,25 @@ define( [ "jquery" ], function( jquery ) {
       $scope.searchedCustomers = null;
       $scope.searchedCustomersMap = null;
       
-      if( $routeParams.action == "show" && $routeParams.customerId ) {
-         $scope.checkInCustomer( $routeParams.customerId );
+      // /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      $scope.checkInCustomerById = function( customerId ) {
+         db.getCustomerById( customerId )
+         .then( function( customer ) {
+            console.log( "checkin customer: " );
+            console.log( customer );
+            if( customer ) {
+               $scope.customer = customer;
+               fetchIssuedBooks();
+            }
+         });
+      };
+
+      console.log( $routeParams );
+      var customerId = $routeParams.customerId;
+      if( $routeParams.action == "show" && customerId ) {
+         console.log( "check in customer with id: " + customerId );
+         $scope.checkInCustomerById( customerId );
       };
       
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,21 +88,15 @@ define( [ "jquery" ], function( jquery ) {
         });
      };
      
-     $scope.checkInHello = function( customerId ) {
-       console.log( "Hello ngClick :-) " + customerId ); 
-     };
      
-      // /////////////////////////////////////////////////////////////////////////////////////////////////////////
+     // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      $scope.checkInCustomer = function( customerIndex ) {
-         var customer = $scope.searchedCustomers[ customerIndex ];
-         console.log( "checkin customer: " );
-         console.log( customer );
-         if( customer ) {
-            $scope.customer = customer;
-            fetchIssuedBooks();
-         }
-      };
+     $scope.checkInCustomerByIndex = function( customerIndex ) {
+        var customer = $scope.searchedCustomers[ customerIndex ];
+        if( customer ) {
+           $location.path( "#/issues/show/" + customer.id  );
+        }
+     };
 
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -181,8 +192,11 @@ define( [ "jquery" ], function( jquery ) {
                console.log( "Person ID detected: " + searchText );
                db.getCustomerByBarcode( searchText )
                .then( function( customer ) {
-                  $scope.customer = customer;
-                  fetchIssuedBooks();
+                  var newLocation = "/issues/show/" + customer.id;
+                  console.log( "new location is: " + newLocation ); 
+                  $location.path( newLocation ).replace();
+                  // $scope.customer = customer;
+                  // fetchIssuedBooks();
                   return customer;
                } );
             }

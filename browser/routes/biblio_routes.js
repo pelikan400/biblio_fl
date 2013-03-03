@@ -7,6 +7,11 @@ define( [], function() {
          controller : 'BookLoansController'
       } );
 
+      $routeProvider.when( '/issues/:action/:customerId', {
+         templateUrl : 'views/issues.html',
+         controller : 'BookLoansController'
+      } );
+
       $routeProvider.when( '/books/:action', {
          templateUrl : 'views/book_edit.html',
          controller : 'BooksController'

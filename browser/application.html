@@ -1,43 +1,46 @@
 <!DOCTYPE html>
 <html lang="de">
-   <head>
-      <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-      <title>Bibliothek KGS Forster Linde</title>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Bibliothek KGS Forster Linde</title>
 
-      <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
-      <link rel="stylesheet" href="application.css">
+<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="application.css">
 </head>
 <body>
 
-<div class="container" data-ng-controller="ApplicationController">
-   <div class="navbar">
-     <div class="navbar-inner">
-       <a class="brand" href="#">Biblio FL</a>
-       <ul class="nav" data-ng-repeat="menu in mainMenu">
-         <li data-ng-class="{ active: menu.id == activeMenuId, dropdown: menu.submenu}">
-           <a href="{{menu.href}}" data-ng-class="{ 'dropdown-toggle' : 'Hello'}">{{menu.name}}</a>
-           <ul class="dropdown-menu" data-ng-show="menu.submenu" data-ng-repeat="submenu in menu.submenu">
-             <li><a href="{{submenu.href}}">{{submenu.name}}</a>
-           </ul>
-         </li>
-       </ul>
-     </div>
-   </div>
+	<div class="container" data-ng-controller="ApplicationController">
+		<div class="navbar">
+			<div class="navbar-inner">
+				<a class="brand" href="#">Biblio FL</a>
+				<ul class="nav" data-ng-repeat="menu in mainMenu">
+					<li
+						data-ng-class="{ active: menu.id == activeMenuId, dropdown: menu.submenu != null}">
+						<a href="{{menu.href}}"
+						data-ng-class="{ 'dropdown-toggle' : true}">{{menu.name}}</a>
+						<ul class="dropdown-menu" data-ng-show="menu.submenu"
+							data-ng-repeat="submenu in menu.submenu">
+							<li><a href="{{submenu.href}}">{{submenu.name}}</a>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
 
-   <div class="row">
-      <div class="span12">
-         <div data-ixoid-messages="ixoidMessages"></div>
-      </div>
-   </div>
+		<div class="row">
+			<div class="span12">
+				<div data-ixoid-messages="ixoidMessages"></div>
+			</div>
+		</div>
 
 
-   <div class="row">
-     <div data-ng-view class="span12"></div>
-   </div>
-</div>
+		<div class="row">
+			<div data-ng-view class="span12"></div>
+		</div>
+	</div>
 
-<script src="lib/requirejs/require.js"></script>
-<script src="application.js"></script>
+	<script src="lib/requirejs/require.js"></script>
+	<script src="application.js"></script>
 
 </body>
 </html>

@@ -67,9 +67,15 @@ class BerkeleyDB:
          return item
       return None
 
-   def allItems( self, role, idPrefix, searchPattern ) :
-      data = "[ "
+   def allItems( self, role, idPrefix, searchPattern, page = 1, pageSize = 20 ) :
+      page = page - 1
+      beginCounter = ( page - 1 ) * pageSize
+      if beginCounter < 0 :
+         beginCounter = 0
+      endCounter = beginCounter + pageSize
+      data = '{ "items" : [ ' 
       first = True
+      itemCounter = 0
       for key, valueAscii in self.db.iteritems() :
          value = unicode( valueAscii, "UTF-8" )
          if not self.filterItem( role, "GET", key ) :
@@ -78,13 +84,24 @@ class BerkeleyDB:
             continue
          if searchPattern and value.find( searchPattern ) == -1 :
             continue
+         if itemCounter < beginCounter :
+            itemCounter += 1
+            continue
+         if itemCounter >= endCounter :
+            break
+         if itemCounter >= pageSize :
+            continue
          if first : 
             first = False
          else :
             data += ","
          data += '%s' % value
          pass
-      data += " ]"
+      data += ' ], '
+      totalPages = itemCounter / pageSize + 1 
+      data += ' "page" : %s, ' % page
+      data += ' "pageSize" : %s, ' % pageSize
+      data += ' "totalPages" : %s }' % totalPages
       return data
 
    # TODO implement scan

@@ -4,8 +4,8 @@ define( function() {
     var controller = [ '$scope', "ixoidDatabase", "$q", function ApplicationController( $scope, db, q ) {
         $scope.mainMenu = [ 
           { id: "issues", name : "Ausleihen", href: "#/issues" },
-          { id: "books", name : "Bücher", href: "#/books" },
-          { id: "customers", name : "Kunden", href: "#/customers" },
+          { id: "books", name : "Bücher", href: "#/books/new" },
+          { id: "customers", name : "Kunden", href: "#/customers/new" },
           { id: "administration", name : "Administration", href: "#/administration", 
             submenu: [ 
              { id: "systemUsers", name : "Ausleihen", href: "#/systemUsers" },

@@ -1,85 +1,99 @@
+<div class="row">
+   <div class="span12 text-right">
+      <div class="btn-group">
+         <button class="btn">Liste aller ausgeliehenen Büchern</button>
+         <button class="btn">Neues Buch</button>
+      </div>
+   </div>
+</div>
+
 <h4>Buch anlegen / ändern</h4>
 
+
 <form class="form-horizontal" data-ng-submit="saveBook()">
-  <div class="control-group">
-    <label  class="control-label">Autor</label>
-    <div class="controls">
-      <input type="hidden" ng-model="editableBook.id" />
-      <input type="text" class="input-xlarge" ng-model="editableBook.author" />
-    </div>
-  </div>
-  <div class="control-group">
-    <label class="control-label">Titel</label>
-    <div class="controls">
-      <input type="text"  class="input-xxlarge" ng-model="editableBook.title" />
-    </div>
-  </div>
-  <div class="control-group">
-    <label class="control-label">Verlag</label>
-    <div class="controls">
-      <input type="text" ng-model="editableBook.publisher" />
-    </div>
-  </div>
-  <div class="control-group">
-    <label class="control-label">Nummer</label>
-    <div class="controls">
-      <input type="text" ng-model="signature" />
-    </div>
-  </div>
-  <div class="control-group">
-    <label class="control-label">Schlagwörter</label>
-    <div class="controls">
-      <input type="text" 
-	     ng-model="editableBook.tags" />
-    </div>
-  </div>
-  <div class="control-group">
-    <label class="control-label">ISBN</label>
-    <div class="controls">
-      <input type="text" 
-	     ng-model="editableBook.isbn" />
-    </div>
-  </div>
-  <div class="control-group">
-    <label class="control-label">Antolin</label>
-    <div class="controls">
-      <input type="text" 
-	     ng-model="editableBook.antolin" />
-    </div>
-  </div>
-  <div class="control-group">
-    <label class="control-label">Spender</label>
-    <div class="controls">
-      <input type="text" 
-	     ng-model="editableBook.donation" />
-    </div>
-  </div>
-  <div class="control-group">
-    <div class="controls">
-      <label class="checkbox">
-        <input type="checkbox" 
-	       ng-model="editableBook.donationCertificate" /> Spendenbescheinigung</label>
-    </div>
-  </div>
-  <div class="control-group">
-    <label class="control-label">Barcode</label>
-    <div class="controls">
-      <input type="text" 
-	     ng-model="editableBook.barcode" />
-    </div>
-  </div>
+	<div class="control-group">
+		<label class="control-label">Autor</label>
+		<div class="controls">
+			<input type="hidden" ng-model="editableBook.id" /> <input
+				type="text" class="input-xlarge" data-ixoid-focus ng-model="editableBook.author" />
+		</div>
+	</div>
 
-  <div class="control-group">
-    <label class="control-label">Notizen</label>
-    <div class="controls">
-      <textarea rows="4" class="input-xlarge"
-	     ng-model="editableBook.notes" />
-    </div>
-  </div>
+	<div class="control-group">
+		<label class="control-label">Titel</label>
+		<div class="controls">
+			<input type="text" class="input-xxlarge"
+				ng-model="editableBook.title" />
+		</div>
+	</div>
 
-  <div class="control-group">
-    <div class="controls">
-      <button type="submit" class="btn" data-ng-submit="saveBook()">Speichern</button>
-    </div>
-  </div>
+	<div class="control-group">
+		<label class="control-label">Verlag</label>
+		<div class="controls">
+			<input type="text" ng-model="editableBook.publisher" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Nummer</label>
+		<div class="controls">
+			<input type="text" ng-model="signature" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Schlagwörter</label>
+		<div class="controls">
+			<input type="text" ng-model="editableBook.tags" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">ISBN</label>
+		<div class="controls">
+			<input type="text" ng-model="editableBook.isbn" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Antolin</label>
+		<div class="controls">
+			<input type="text" ng-model="editableBook.antolin" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Spender</label>
+		<div class="controls">
+			<input type="text" ng-model="editableBook.donation" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<div class="controls">
+			<label class="checkbox"> <input type="checkbox"
+				ng-model="editableBook.donationCertificate" /> Spendenbescheinigung
+			</label>
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Notizen</label>
+		<div class="controls">
+			<textarea rows="4" class="input-xlarge" ng-model="editableBook.notes" />
+		</div>
+	</div>
+
+   <div class="control-group">
+      <label class="control-label">Barcode</label>
+      <div class="controls">
+         <input type="text" ng-model="editableBook.barcode" />
+      </div>
+   </div>
+
+	<div class="control-group">
+		<div class="controls">
+			<button type="submit" class="btn" data-ng-submit="saveBook()">Speichern</button>
+		</div>
+	</div>
 </form>

@@ -17,6 +17,9 @@
  * limitations under the License.
  * ========================================================== */
 
+"use strict";
+
+console.log( "boostrap initialized" );
 
 !function ($) {
 

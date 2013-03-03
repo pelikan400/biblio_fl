@@ -1,64 +1,49 @@
 <h3>Kundin anlegen / ändern</h3>
-<form class="form-horizontal" ng-submit="editCustomer()">
-  <div class="control-group">
-    <label  class="control-label">Vorname</label>
-    <div class="controls">
-      <input type="hidden" ng-model="editableCustomer.id" />
-      <input type="text" class="input-xlarge" ng-model="editableCustomer.firstName" />
-    </div>
-  </div>
+<form class="form-horizontal" ng-submit="saveCustomerAndCreateNew()">
 
-  <div class="control-group">
-    <label  class="control-label">Nachname</label>
-    <div class="controls">
-      <input type="text" class="input-xlarge" ng-model="editableCustomer.firstName" />
-    </div>
-  </div>
+	<div class="control-group">
+		<label class="control-label">Vorname</label>
+		<div class="controls">
+			<input type="hidden" ng-model="editableCustomer.id" /> <input
+			id="firstName"	type="text" ng-model="editableCustomer.firstName" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Nachname</label>
+		<div class="controls">
+			<input type="text" ng-model="editableCustomer.lastName" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Klasse</label>
+		<div class="controls">
+			<select data-ng-model="editableCustomer.schoolClass"
+				data-ng-options="value for ( key, value ) in editableCustomer.schoolClassMap">
+			</select>
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Notizen</label>
+		<div class="controls">
+			<textarea rows="4" class="input-xlarge"
+				ng-model="editableCustomer.notes" />
+		</div>
+	</div>
 
 
-      <hr/>
-      <div class="controls controls-row">
-         <input class="span3" type="text" ng-model="editableCustomer.firstName" placeholder="Vorname">
-         <input class="span3" type="text" ng-model="editableCustomer.lastName" placeholder="Nachname">
-      </div>
-      <div class="controls controls-row">
-         <select class="span3" ng-model="type">
-            <option value=""> -- Typ -- </option>
-             <option value="PUPIL" selected="selected">Schüler</option>
-             <option value="PUPIL">Lehrer</option>
-             <option value="PUPIL">Sonstige</option>
-         </select>
-         <select class="span3" ng-model="maximumIssues">
-            <option value="0"> -- Anzahl ausleihbarer Bücher -- </option>
-             <option value="1" selected="selected">1</option>
-             <option value="2">2</option>
-             <option value="3">3</option>
-             <option value="5">5</option>
-             <option value="10">10</option>
-             <option value="20">20</option>
-         </select>
-      </div>
-      <div class="controls controls-row">
-         <select class="span3" name="schoolClass">
-            <option value="0"> -- Klasse  -- </option>
-             <option value="1" selected="selected">keine</option>
-             <option value="2">1 a</option>
-             <option value="3">1 b</option>
-             <option value="5">2 a</option>
-             <option value="10">2 b</option>
-             <option value="20">3 a</option>
-             <option value="20">3 b</option>
-             <option value="20">4 a</option>
-             <option value="20">4 b</option>
-         </select>
-         <input class="span3" type="text" placeholder="Barcode">
-      </div>
-      <hr/>
-      <div class="controls controls-row">
-         <div class="offset2 span4">
-            <button class="btn btn-primary">Ändern</button>
-            <button class="btn btn-primary">Anlegen</button>
-            <button class="btn btn-danger">Löschen</button>
-         </div>
-      </div>
-   </form>
+	<div class="control-group">
+		<label class="control-label">Barcode</label>
+		<div class="controls">
+			<input type="text" ng-model="editableCustomer.barcode" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<div class="controls">
+			<button type="submit" class="btn btn-primary">Speichern</button>
+		</div>
+	</div>
+</form>

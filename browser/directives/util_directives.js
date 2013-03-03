@@ -14,7 +14,31 @@ define( [ "jquery", "underscore" ], function( jquery, _ ) {
     * - `actions` (optional): an array of objects { apply: function, label: String, style: 'danger'|'' }
     * - `retry` (optional): convenience shortcut for `actions: { apply: <retry> label: 'Retry action', style: 'danger' }`
     */
-   var ixoidMessage  = function() {
+   
+   
+   var ixoidFocus = function() {
+      return {
+         link: function( scope, element, attrs ) {
+            jquery( element[ 0 ] ).focus();
+            console.log( "set focus" );
+         }
+      };
+   };
+   
+   var ixoidDisableSubmitOnEnter = function() {
+      return {
+         link: function( scope, element, attrs ) {
+            $( element[ 0 ] ).keydown(function (e) {
+               if (e.keyCode == 13) {
+                   e.preventDefault();
+                   return false;
+               }
+           });
+         }
+      };
+   };
+   
+   var ixoidMessage  = [ "$timeout", function( $timeout ) {
        var messageTypeToBootstrapClass = {
           success: 'alert-success',
           error: 'alert-error',
@@ -44,7 +68,8 @@ define( [ "jquery", "underscore" ], function( jquery, _ ) {
          console.log( attrs );
 
          function dismiss() {
-           jqery( element[ 0 ] ).alert( 'close' );
+            jquery( element[ 0 ] ).hide();
+            // jquery( element[ 0 ] ).alert( 'close' );
            scope.$emit( 'ixoidMessage.messageDismissed', scope.message );
          }
             
@@ -82,7 +107,7 @@ define( [ "jquery", "underscore" ], function( jquery, _ ) {
             
          scope.$watch( 'message', function( message ) {
              if( message != null ) {
-
+                $timeout( scope.dismiss, 3000 );
                scope.text = message.text || message.message;
                scope.heading = message.heading || scope.fallbackHeading;
                   
@@ -98,8 +123,9 @@ define( [ "jquery", "underscore" ], function( jquery, _ ) {
            } );
        }
      };
-   };
+   } ];
             
+   
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    var ixoidMessages = function() {
@@ -136,6 +162,8 @@ define( [ "jquery", "underscore" ], function( jquery, _ ) {
        console.log( "Util directives registered." );
        angularModule.directive( 'ixoidMessage', ixoidMessage );
        angularModule.directive( 'ixoidMessages', ixoidMessages );
+       angularModule.directive( 'ixoidFocus', ixoidFocus );
+       angularModule.directive( 'ixoidDisableSubmitOnEnter', ixoidDisableSubmitOnEnter );
      }
    };
 } );

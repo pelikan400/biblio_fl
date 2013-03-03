@@ -192,9 +192,12 @@ define( [ "jquery" ], function( jquery ) {
                console.log( "Person ID detected: " + searchText );
                db.getCustomerByBarcode( searchText )
                .then( function( customer ) {
-                  var newLocation = "/issues/show/" + customer.id;
-                  console.log( "new location is: " + newLocation ); 
-                  $location.path( newLocation ).replace();
+                  if( customer ) {
+                     $location.path( "/issues/show/" + customer.id ).replace();
+                  }
+                  else {
+                     $location.path( "/issues" );
+                  }
                   // $scope.customer = customer;
                   // fetchIssuedBooks();
                   return customer;

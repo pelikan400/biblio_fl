@@ -90,16 +90,14 @@
                <th>Name</th>
                <th>Notizen</th>
                <th>Barcode</th>
-               <th><i class="icon-pencil"></i></th>
             </tr>
          </thead>
          <tbody>
             <tr ng-repeat="customer in searchedCustomers">
                <td>{{$index + 1}}</td>
-               <td><span data-ng-click="checkInCustomer( $index )">{{customer.firstName}} {{customer.lastName}}</span></td>
+               <td><a href="#/issues/show/{{customer.id}}"><span data-ng-click="checkInCustomer( $index )">{{customer.firstName}} {{customer.lastName}}</span></a></td>
                <td>{{customer.notes}}</td>
                <td>{{customer.barcode}}</td>
-               <td><button class="btn" data-ng-click="checkInCustomer( $index )"><i class="icon-user"></i></button></td>
             </tr>
          </tbody>
       </table>

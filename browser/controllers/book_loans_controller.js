@@ -63,6 +63,12 @@ define( [ "jquery" ], function( jquery ) {
                      $scope.issuedBooks.push( book );
                   }
                } );
+               $scope.returnedBooks.sort( function( r1, r2 ) { 
+                   return r2.returnDate.getTime() - r1.returnDate.getTime();
+               });
+               $scope.issuedBooks.sort( function( r1, r2 ) { 
+                   return r2.issueDate.getTime() - r1.issueDate.getTime();
+               });
                console.log( $scope.issuedBooks );
             } );
          }

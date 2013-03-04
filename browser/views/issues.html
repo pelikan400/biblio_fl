@@ -31,17 +31,15 @@
 					<th>Signatur</th>
 					<th>Ausgeliehen bis</th>
                <th>Notizen</th>
-               <th><i class="icon-pencil"></i></th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr ng-repeat="book in issuedBooks">
 					<td>{{$index + 1}}</td>
-					<td>{{book.title}}</td>
+					<td><a href="#/books/edit/{{book.id}}">{{book.title}}</a></td>
 					<td>{{book.signature}}</td>
 					<td>{{book.dueDate.asGermanDate()}}</td>
                <td>{{book.notes}}</td>
-               <td><a href="#/books/edit/{{book.id}}"><i class="icon-pencil"></i></a></td>
 				</tr>
 			</tbody>
 		</table>
@@ -63,17 +61,15 @@
                <th>Signatur</th>
                <th>Zurückgebracht am</th>
                <th>Notizen</th>
-               <th><i class="icon-pencil"></i></th>
             </tr>
          </thead>
          <tbody>
             <tr ng-repeat="book in returnedBooks">
                <td>{{$index + 1}}</td>
-               <td>{{book.title}}</td>
+               <td><a href="#/books/edit/{{book.id}}">{{book.title}}</a></td>
                <td>{{book.signature}}</td>
                <td>{{book.returnDate.asGermanDate()}}</td>
                <td>{{book.notes}}</td>
-               <td><a href="#/books/edit/{{book.id}}"> <button class="btn"><i class="icon-book"></i></button></a></td>
             </tr>
          </tbody>
       </table>

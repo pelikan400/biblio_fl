@@ -6,7 +6,7 @@ define( function() {
           { id: "issues", name : "Ausleihen", href: "#/issues" },
           { id: "books", name : "Bücher", href: "#/books/new" },
           { id: "customers", name : "Kunden", href: "#/customers/new" },
-          { id: "administration", name : "Administration", href: "#/administration", 
+          { id: "administration", name : "Administration", 
             submenu: [ 
              { id: "systemUsers", name : "Ausleihen", href: "#/systemUsers" },
              { id: "importBooks", name : "Bücher importieren", href: "#/importBooks" },

@@ -129,6 +129,8 @@ define( [ "jquery" ], function( jquery ) {
                else {
                   return $scope.customer;
                }
+            } ).then( function( customer ) {
+                db.createCirculation( book, customer ).put();
             } ).then( function() {
                fetchIssuedBooks();
             } );
@@ -174,10 +176,15 @@ define( [ "jquery" ], function( jquery ) {
                }
             };
 
-            saveOldCustomer( book.issuedBy ).then( function() {
+            saveOldCustomer( book.issuedBy )
+            .then( function( customer ) {
                console.log( "save book" );
                book.issuedBy = $scope.customer.id;
-               return book.put();
+               return book.put()
+               .then( function( book ) {
+                   db.createCirculation( book, customer ).put();
+                   return book;
+               } );
             } ).then( function() {
                console.log( "add book to new customer" );
                $scope.customer.addBook( book.id );

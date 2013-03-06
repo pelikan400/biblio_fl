@@ -1,6 +1,6 @@
 "use strict";
 
-define( function() {
+define( [ "underscore" ], function( _ ) {
    'use strict';
 
      var controller = [ '$scope', '$routeParams', '$location', "ixoidDatabase", 
@@ -11,10 +11,34 @@ define( function() {
         // console.log( "routeParams:" );
         // console.log( $routeParams );
 
-        if( $routeParams.action == "list" ) {
+        $scope.bookList = null;
+        $scope.bookListTitle = "";
+        $scope.editableBook = null;
+
+        if( $routeParams.action == "listIssued" ) {
+            db.scanBooks( "ISSUED" )
+            .then( function( bookList ) { 
+                var customerIdList = [];
+                $scope.bookListTitle = "Liste aller ausgeliehenen Büchern";
+                $scope.bookList = bookList;
+                $scope.bookList.sort( function( r1, r2 ) {
+                    return r1.dueDate.getTime() - r2.dueDate.getTime();
+                });
+                _.each( bookList, function( book ) {
+                    customerIdList.push( book.issuedBy );
+                });
+                db.getCustomersByIdList( customerIdList ) 
+                .then( function( customers ) { 
+                    _.each( customers, function( customer, idx ) {
+                       $scope.bookList[ idx ].issuedByCustomer = customer;
+                   }); 
+                }); 
+            });
+        }
+        else if( $routeParams.action == "list" ) {
           // get book list
         }
-        if( $routeParams.action == "new" ) {
+        else if( $routeParams.action == "new" ) {
           $scope.editableBook = db.createBook();
           $scope.originalBarcode = $scope.editableBook.barcode;
         }

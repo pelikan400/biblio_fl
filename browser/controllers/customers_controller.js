@@ -8,11 +8,18 @@ define( [ "jquery"], function( jquery ) {
       // console.log( "CustomersController initialized." );
       $scope.$root.activeMenuId = "customers";
 
-      
+      $scope.customerList = null;
+      $scope.editableCustomer = null;
+      $scope.originalBarcode = null;
+
       if( $routeParams.action == "list" ) {
-         // get book list
+          db.getAllCustomers()
+          .then( function( customerList ) {
+              $scope.customerList = customerList;
+              console.log( $scope.customerList );
+          });
        }
-       if( $routeParams.action == "new" ) {
+       else if( $routeParams.action == "new" ) {
           $scope.editableCustomer = db.createCustomer();
           $scope.originalBarcode = $scope.editableCustomer.barcode;
        }
@@ -23,8 +30,6 @@ define( [ "jquery"], function( jquery ) {
             $scope.originalBarcode = $scope.editableCustomer.barcode;
          } );
        }
-
-      $scope.customerList = [];
 
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
       

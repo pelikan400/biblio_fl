@@ -106,6 +106,16 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       };
 
       // //////////////////////////////////////////////////////////////////////////////////////////////////
+      
+      function Barcode( barcode ) {
+         Document.call( this, Barcode.idPrefix + barcode );
+      }
+ 
+      _.extend( Barcode.prototype, Document.prototype );
+ 
+      Barcode.idPrefix = "barcode-";
+ 
+      // //////////////////////////////////////////////////////////////////////////////////////////////////
 
       function Book( id ) {
          Document.call( this, id, Book.idPrefix );
@@ -115,8 +125,6 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
 
       Book.idPrefix = "book-";
       
-      // a hook to correct objects created from JSON
-      // for example Date fields
       Book.prototype.afterGet = function() {
          if( this.dueDate ) {
             this.dueDate = new Date( this.dueDate );
@@ -182,15 +190,36 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          "2009b" : "4b"
       };
 
+      Customer.prototype.schoolClassReverseMap = {
+         "0" : "keine",
+
+         "2012a" : "1a",
+         "2012b" : "1b",
+
+         "2011a" : "2a",
+         "2011b" : "2b",
+
+         "2010a" : "3a",
+         "2010b" : "3b",
+
+         "2009a" : "4a",
+         "2009b" : "4b"
+      };
+
+
       // //////////////////////////////////////////////////////////////////////////////////////////////////
 
-      function Barcode( barcode ) {
-         Document.call( this, Barcode.idPrefix + barcode );
+      function Circulation( book, customer ) {
+         Document.call( this );
+         this.customerId = customer.id;
+         this.bookId = book.id;
+         this.issuedStatus = book.issuedStatus;
+         this.modificationDate = new Date();
       }
 
-      _.extend( Barcode.prototype, Document.prototype );
+      _.extend( Circulation.prototype, Document.prototype );
 
-      Barcode.idPrefix = "barcode-";
+      Circulation.idPrefix = "circulation-";
 
       // //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -229,54 +258,35 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       }
 
       var scanDocuments = function( Klass, searchText ) {
-         var deferred = q.defer();
-         db.scanDocuments( Klass.idPrefix, searchText ).then( function( response ) {
+         return db.scanDocuments( Klass.idPrefix, searchText ).then( function( response ) {
             if( response ) {
                var docs = [];
                var docArray = response.items;
-               docArray.forEach( function( item ) {
+               _.each( docArray, function( item ) {
                   var document = new Klass( item.id );
                   _.extend( document, item );
                   document.afterGet();
                   docs.push( document );
                } );
-               deferred.resolve( docs );
+               return docs;
             }
             else {
-               deferred.resolve( null );
+              return null;
             }
          } );
-         return deferred.promise;
       };
 
       var getAllDocuments = function( Klass ) {
-         var deferred = q.defer();
-         db.scanDocuments( Klass.idPrefix, searchText ).then( function( docArray ) {
-            if( docArray ) {
-               var docs = [];
-               docArray.forEach( function( item ) {
-                  var document = new Klass( item.id );
-                  _.extend( document, item );
-                  document.afterGet();
-                  docs.push( document );
-               } );
-               deferred.resolve( docs );
-            }
-            else {
-               deferred.resolve( null );
-            }
-         } );
-         return deferred.promise;
+        return scanDocuments( Klass );
       };
 
       var getDocumentsByIdList = function( Klass, idList ) {
          var docPromises = [];
-         idList = _.asArray( idList );
          if( !idList || idList.length == 0 ) {
             return q.when( null );
          }
 
-         idList.forEach( function( id ) {
+         _.each( idList, function( id ) {
             var document = new Klass( id ).get();
             docPromises.push( document );
          } );
@@ -300,7 +310,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
       };
 
       var importDummyData = function() {
-         dummyData.customers.forEach( function( item ) {
+        _.each( dummyData.customers, function( item ) {
             var customer = new Customer();
             _.extend( customer, item );
             customer.put();
@@ -308,7 +318,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             barcodeObj.reference = customer.id;
             barcodeObj.put();
          } );
-         dummyData.books.forEach( function( item ) {
+        _.each( dummyData.books, function( item ) {
             var book = new Book();
             _.extend( book, item );
             book.put();
@@ -352,15 +362,26 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          scanDocuments : scanDocuments,
          getAllDocuments : getAllDocuments,
          getDocumentsByIdList : getDocumentsByIdList,
+         Document : Document,
+         Book : Book,
+         Customer: Customer,
+         Circulation: Circulation,
 
          getRawDocument: function( id ) {
             return getDocument( Document, id );
          },
+         createDocument : function( id ) {
+            return new Document( id );
+         },
+
          scanBooks : function( searchText ) {
             return scanDocuments( Book, searchText );
          },
          getAllBooks : function() {
             return getAllDocuments( Book );
+         },
+         getBooksByIdList : function( idList ) {
+            return getDocumentsByIdList( Book, idList );
          },
          createBook : function() {
             return new Book();
@@ -377,6 +398,9 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          },
          getAllCustomers : function() {
             return getAllDocuments( Customer );
+         },
+         getCustomersByIdList : function( idList ) {
+            return getDocumentsByIdList( Customer, idList );
          },
          createCustomer : function() {
             return new Customer();
@@ -396,8 +420,6 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          getBarcodeByBarcode : function( barcode ) {
             return new Barcode( barcode ).get();
          },
-         
-         
          checkBarcodeString : checkBarcodeString,
          today : function() {
             var d = new Date();
@@ -408,30 +430,12 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             return d;
          },
 
-      // getIssuedBooksByCustomer: function( customer ) {
-      // var deferred = q.defer();
-      // var issuedBooks = [];
-      // if( customer && customer.issuedBooks ) {
-      // allBooksPromises = [];
-      // customer.issuedBooks.forEach( function( bookKey ) {
-      // allBooksPromises.push(
-      // db.getDocument( bookKey )
-      // .then( function( doc ) {
-      // issuedBooks.push( doc );
-      // return doc;
-      // })
-      // );
-      // } );
-      // q.all( allBooksPromises )
-      // .then( function() {
-      // deferred.resolve( issuedBooks );
-      // });
-      // }
-      // else {
-      // deferred.resolve( issuedBooks );
-      // }
-      // return deferred.promise;
-      // }
+         createCirculation: function( book, customer ) {
+            return new Circulation( id );
+         },
+         getAllCirculations: function() {
+            return getAllDocuments( Circulation );
+         }
       };
    } ]; // service
 

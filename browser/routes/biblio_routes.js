@@ -37,6 +37,11 @@ define( [], function() {
          controller : 'AdministrationController'
       } );
 
+      $routeProvider.when( '/barcodes', {
+         templateUrl : 'views/barcode_edit.html',
+         controller : 'BarcodeController'
+      } );
+
       $routeProvider.otherwise( {
          redirectTo : '/issues'
       } );

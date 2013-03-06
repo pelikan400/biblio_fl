@@ -353,6 +353,9 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
          getAllDocuments : getAllDocuments,
          getDocumentsByIdList : getDocumentsByIdList,
 
+         getRawDocument: function( id ) {
+            return getDocument( Document, id );
+         },
          scanBooks : function( searchText ) {
             return scanDocuments( Book, searchText );
          },
@@ -363,7 +366,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             return new Book();
          },
          getBookById : function( id ) {
-            return new Book( id ).get();
+            return getDocument( Book, id );
          },
          getBookByBarcode : function( bookBarcode ) {
             return getDocumentByBarcode( Book, bookBarcode );
@@ -379,7 +382,7 @@ define( [ "angular", "underscore", "./restDB", "./dummyData" ], function( angula
             return new Customer();
          },
          getCustomerById : function( id ) {
-            return new Customer( id ).get();
+            return getDocument( Customer, id );
          },
          getCustomerByBarcode : function( customerBarcode ) {
             return getDocumentByBarcode( Customer, customerBarcode );

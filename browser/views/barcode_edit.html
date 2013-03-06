@@ -1,0 +1,48 @@
+
+<h4>Barcodes ausdrucken</h4>
+
+<p>
+	In der aktuellen Version können nur genau 40 Etiketten auf
+	<emph>ein</emph>
+	Avery-Zweckform Bogen Nr. 4780 oder 3657 ausgedruckt werden.
+</p>
+
+<form class="form-horizontal" data-ng-submit="printBarcodes()">
+	<div class="control-group">
+		<label class="control-label">Barcodenummer für Bücher</label>
+		<div class="controls">
+			<input type="text" ng-model="configuration.counters.books" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Barcodenummer für Bücher</label>
+		<div class="controls">
+			<input type="text" ng-model="configuration.counters.customers" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label">Name der Bibliothek</label>
+		<div class="controls">
+			<input type="text" ng-model="configuration.companyName" />
+		</div>
+	</div>
+
+	<div class="control-group">
+		<div class="controls">
+			<label class="radio"> <input type="radio"
+				ng-model="barcodeType" value="books"> Barcodes für Bücher
+			</label> <label class="radio"> <input type="radio"
+				ng-model="barcodeType" id="optionsRadios2" value="customers"> Barcodes für
+				Kunden
+			</label>
+		</div>
+	</div>
+
+	<div class="control-group">
+		<div class="controls">
+			<button type="submit" class="btn" data-ng-submit="printBarcodes()">PDF Ausdruck erzeugen</button>
+		</div>
+	</div>
+</form>

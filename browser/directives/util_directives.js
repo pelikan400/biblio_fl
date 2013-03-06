@@ -1,7 +1,9 @@
 "use strict";
 
 define(
-   [ "jquery", "underscore" ],
+   [
+      "jquery", "underscore"
+   ],
    function( jquery, _ ) {
 
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,23 +20,27 @@ define(
        */
 
       var ixoidFocus = function() {
-         return { link : function( scope, element, attrs ) {
-            jquery( element[ 0 ] ).focus();
-            console.log( "set focus" );
-         } };
+         return {
+            link : function( scope, element, attrs ) {
+               jquery( element[ 0 ] ).focus();
+               console.log( "set focus" );
+            }
+         };
       };
 
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       var ixoidDisableSubmitOnEnter = function() {
-         return { link : function( scope, element, attrs ) {
-            $( element[ 0 ] ).keydown( function( e ) {
-               if( e.keyCode == 13 ) {
-                  e.preventDefault();
-                  return false;
-               }
-            } );
-         } };
+         return {
+            link : function( scope, element, attrs ) {
+               $( element[ 0 ] ).keydown( function( e ) {
+                  if( e.keyCode == 13 ) {
+                     e.preventDefault();
+                     return false;
+                  }
+               } );
+            }
+         };
       };
 
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,58 +49,63 @@ define(
                [
                   "$timeout",
                   function( $timeout ) {
-                     var messageTypeToBootstrapClass =
-                              { success : 'alert-success', error : 'alert-error', warning : 'alert-warning',
-                                 info : 'alert-info' };
+                     var messageTypeToBootstrapClass = {
+                        success : 'alert-success',
+                        error : 'alert-error',
+                        warning : 'alert-warning',
+                        info : 'alert-info'
+                     };
 
                      return {
                         template : '<div class="alert alert-block {{alertClass}} fade in">'
                            + '<button class="close" type="button" data-ng-click="dismiss( $event )">x</button>'
-                           + '<h4 data-ng-show="heading != null" class="alert-heading">{{heading}}</h4>'
+                           + '<h4 data-ng-show="heading" class="alert-heading">{{heading}}</h4>'
                            + '<p>{{text}}</p>'
-                           + '<p ng-repeat="action in actions()">'
+                           + '<p ng-repeat="action in actions">'
                            + '<button class="btn btn-{{action.style}}" data-ng-click="apply( action )">{{action.label}}</button>'
                            + '</p>' + '</div>',
 
-                        scope : { fallbackHeading : '@heading', message : '=ixoidMessage' },
+                        scope : {
+                           fallbackHeading : '@heading',
+                           message : '=ixoidMessage'
+                        },
 
                         link : function( scope, element, attrs ) {
-                           function dismiss() {
+                           var fillActions = function() {
+                              var actions = [];
+
+                              if( scope.message.actions ) {
+                                 actions = actions.concat( scope.message.actions );
+                              }
+
+                              if( _.isFunction( scope.message.retry ) ) {
+                                 actions.push( {
+                                    label : 'Ausführen',
+                                    apply : scope.message.retry,
+                                    style : 'danger'
+                                 } );
+                              }
+
+                              return actions;
+                           };
+
+                           scope.dismiss = function() {
+                              console.log( "dismiss" );
                               jquery( element[ 0 ] ).hide();
                               // jquery( element[ 0 ] ).alert( 'close' );
                               scope.$emit( 'ixoidMessage.messageDismissed', scope.message );
-                           }
-
-                           var actions = null;
-                           scope.actions =
-                                    function() {
-
-                                       if( actions != null ) {
-                                          return actions;
-                                       }
-
-                                       actions = [];
-
-                                       if( scope.message.actions ) {
-                                          actions = actions.concat( scope.message.actions );
-                                       }
-
-                                       if( _.isFunction( scope.message.retry ) ) {
-                                          actions.push( { label : 'Retry action',
-                                             apply : scope.message.retry, style : 'danger' } );
-                                       }
-
-                                       return actions;
-                                    };
-
-                           scope.apply = function( action ) {
-                              action.apply();
-                              dismiss();
                            };
 
-                           scope.dismiss = dismiss;
+                           scope.apply = function( action ) {
+                              console.log( "apply" );
+                              action.apply();
+                              scope.dismiss();
+                           };
 
                            scope.$watch( 'message', function( message ) {
+                              console.log( "watch" );
+                              console.log( message );
+                              scope.actions = fillActions();
                               if( message != null ) {
                                  $timeout( scope.dismiss, 3000 );
                                  scope.text = message.text || message.message;
@@ -112,8 +123,11 @@ define(
                               }
 
                            } );
-                        } };
-                  } ];
+
+                        }
+                     };
+                  }
+               ];
 
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -123,7 +137,9 @@ define(
                      template : '<div data-ng-repeat="message in messages">'
                         + '<div data-ixoid-message="message"></div>' + '</div>',
 
-                     scope : { messages : '=ixoidMessages' },
+                     scope : {
+                        messages : '=ixoidMessages'
+                     },
 
                      link : function( scope, elements, attrs ) {
                         scope.$on( 'ixoidMessage.messageDismissed', function( event, message ) {
@@ -133,79 +149,110 @@ define(
                               scope.messages.splice( idx, 1 );
                            }
                         } );
-                     } };
+                     }
+                  };
                };
 
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       var ixoidSpanOrInput = function() {
-         return { template : '<span ng-show="">{{text}}</span><input ng-model="text" ng-show="text"/>',
+         return {
+            template : '<span ng-show="">{{text}}</span><input ng-model="text" ng-show="text"/>',
 
-         scope : { text : '=spanOrInput' },
+            scope : {
+               text : '=spanOrInput'
+            },
 
-         link : function( scope, elements, attrs ) {
-            
+            link : function( scope, elements, attrs ) {
 
-         } };
+            }
+         };
       };
 
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      var ixoidDropdownToggle = ['$document', '$location', '$window', function ($document, $location, $window) {
-          var openElement = null, close;
-          return {
-          restrict: 'CA',
-              link: function(scope, element, attrs) {
-              scope.$watch(function dropdownTogglePathWatch(){return $location.path();}, function dropdownTogglePathWatchAction() {
-                  if (close) { close(); }
-                });
-              
-              element.parent().bind('click', function(event) {
-                  if (close) { close(); }
-                });
-              
-              element.bind('click', function(event) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  
-                  var iWasOpen = false;
-                  
-                  if (openElement) {
-                    iWasOpen = openElement === element;
-                    close();
-                  }
-                  
-                  if (!iWasOpen){
-                    element.parent().addClass('open');
-                    openElement = element;
-                    
-                    close = function (event) {
-                      if (event) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                      }
-                      $document.unbind('click', close);
-                      element.parent().removeClass('open');
-                      close = null;
-                      openElement = null;
-                    };
-                    
-                    $document.bind('click', close);
-                  }
-                });
-            }
-          };
-        }];
+      var ixoidDropdownToggle = [
+         '$document', '$location', '$window', function( $document, $location, $window ) {
+            var openElement = null, close;
+            return {
+               restrict : 'CA',
+               link : function( scope, element, attrs ) {
+                  scope.$watch( function dropdownTogglePathWatch() {
+                     return $location.path();
+                  }, function dropdownTogglePathWatchAction() {
+                     if( close ) {
+                        close();
+                     }
+                  } );
+
+                  element.parent().bind( 'click', function( event ) {
+                     if( close ) {
+                        close();
+                     }
+                  } );
+
+                  element.bind( 'click', function( event ) {
+                     event.preventDefault();
+                     event.stopPropagation();
+
+                     var iWasOpen = false;
+
+                     if( openElement ) {
+                        iWasOpen = openElement === element;
+                        close();
+                     }
+
+                     if( !iWasOpen ) {
+                        element.parent().addClass( 'open' );
+                        openElement = element;
+
+                        close = function( event ) {
+                           if( event ) {
+                              event.preventDefault();
+                              event.stopPropagation();
+                           }
+                           $document.unbind( 'click', close );
+                           element.parent().removeClass( 'open' );
+                           close = null;
+                           openElement = null;
+                        };
+
+                        $document.bind( 'click', close );
+                     }
+                  } );
+               }
+            };
+         }
+      ];
+
+      var ixoidAlert =
+               function() {
+                  return {
+                     restrict : 'EA',
+                     template : '<div class="alert" data-ng-class="type && \'alert-\' + type">'
+                        + '<button type="button" class="close" ng-click="close()">&times;</button>'
+                        + '<div ng-transclude></div>' + '</div>',
+                     transclude : true,
+                     replace : true,
+                     scope : {
+                        type : '=',
+                        close : '&'
+                     }
+                  };
+               };
 
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      return { registerExports : function( angularModule ) {
-         console.log( "Util directives registered." );
-         angularModule.directive( 'ixoidMessage', ixoidMessage );
-         angularModule.directive( 'ixoidMessages', ixoidMessages );
-         angularModule.directive( 'ixoidFocus', ixoidFocus );
-         angularModule.directive( 'ixoidDisableSubmitOnEnter', ixoidDisableSubmitOnEnter );
-         angularModule.directive( 'ixoidSpanOrInput', ixoidSpanOrInput );
-         angularModule.directive( 'ixoidDropdownToggle', ixoidDropdownToggle );
-      } };
+      return {
+         registerExports : function( angularModule ) {
+            console.log( "Util directives registered." );
+            angularModule.directive( 'ixoidMessage', ixoidMessage );
+            angularModule.directive( 'ixoidMessages', ixoidMessages );
+            angularModule.directive( 'ixoidFocus', ixoidFocus );
+            angularModule.directive( 'ixoidDisableSubmitOnEnter', ixoidDisableSubmitOnEnter );
+            angularModule.directive( 'ixoidSpanOrInput', ixoidSpanOrInput );
+            angularModule.directive( 'ixoidDropdownToggle', ixoidDropdownToggle );
+            angularModule.directive( 'ixoidAlert', ixoidAlert );
+         }
+      };
    } );

@@ -170,6 +170,10 @@ class Resource( object ):
       cherrypy.response.status = 500
       return ""
    
+   def DELETE( self, *args ):
+      print( "%s with args: %s" % ( "DELETE", args ) )
+      role = self.getRole()
+      
    # def OPTIONS( self, *args ) :
    #    print( "%s with args: %s" % ( "OPTIONS", args ) )
    #    return "{}"

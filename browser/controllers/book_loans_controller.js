@@ -15,6 +15,19 @@ define( [ "jquery" ], function( jquery ) {
       $scope.searchedCustomerText = null;
       $scope.searchedCustomers = null;
       $scope.searchedCustomersMap = null;
+  
+      // $scope.ixoidMessages.push( {
+      //    text : "Suchtext ist zu kurz!",
+      //    heading: "Sicherheitsabfrage", 
+      //    retry: function() {
+      //       console.log( "Hey, retry was called!!" );
+      //       $scope.ixoidMessages.push( {
+      //          text : "OK, danke!",
+      //          type : "success"
+      //       } );
+      //    },
+      //    type : "warning"
+      // } );
       
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -231,11 +244,15 @@ define( [ "jquery" ], function( jquery ) {
          }
          else if( searchText.charAt( 0 ) == "+") {
             searchText = searchText.substring( 1 );
-            console.log( "Search for Persons: " + searchText );
+            // console.log( "Search for Persons: " + searchText );
+            if( searchText.length < 3 ) {
+               $scope.ixoidMessages.push( { text: "Suchtext ist zu kurz!", type: "error" } );
+               return;
+            }
             searchForCustomers( searchText );
          } 
          else {
-            console.log( "Text search: '" + searchText + "'" );
+            // console.log( "Text search: '" + searchText + "'" );
             if( searchText.length < 3 ) {
                $scope.ixoidMessages.push( { text: "Suchtext ist zu kurz!", type: "error" } );
                return;

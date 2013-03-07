@@ -1,5 +1,6 @@
 import cherrypy
 import anydbm
+import json
 # import traceback
 
 ##############################################################################################################
@@ -161,10 +162,19 @@ class Resource( object ):
       role = self.getRole()
       cherrypy.response.headers[ "Content-Type" ] = "application/json;charset=UTF-8"
       if len( args ) == 1 :
-         itemKey = unicode( args[ 0 ], "UTF-8"  )
-         data = unicode( cherrypy.request.body.read(), "UTF-8" )
+         itemKey = args[ 0 ]
+         # itemKey = unicode( args[ 0 ], "UTF-8"  )
+         dataJSON = unicode( cherrypy.request.body.read(), "UTF-8" )
+         # TODO transform data from JSON to internal structure
+         data = json.loads( dataJSON )
          print "PUT: Got key: %s and data: %s from browser" % ( itemKey, data ) 
-         item = db.putItem( role, itemKey, data )
+         itemJSON = unicode( db.getItem( role, itemKey ), "utf-8" )
+         if itemJSON :
+            item = json.loads( itemJSON )
+         print "Transformed data back to JSON: " % dataAsJson.encode( "UTF-8" )
+         dataAsJSON = json.dumps( data )
+
+         # item = db.putItem( role, itemKey, json.dumps( data ) )
          if item : 
             return item.encode( "UTF-8" )
       cherrypy.response.status = 500

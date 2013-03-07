@@ -44,6 +44,8 @@ define( [ "jquery"], function( jquery ) {
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       $scope.saveCustomerAndCreateNew = function() {
+         console.log( "called saveCustomer" );
+
          function internalSaveCustomerAndNew() {
             return $scope.editableCustomer.put()
             .then( function() {
@@ -56,23 +58,32 @@ define( [ "jquery"], function( jquery ) {
                jquery( "#firstName" ).focus();
             });
          }
-         
-         console.log( "called saveCustomer" );
-         if( $scope.originalBarcode == $scope.editableCustomer.barcode ) {
-            return internalSaveCustomerAndNew();
-         }
 
-         if( !db.checkBarcodeString( $scope.editableCustomer.barcode ) ) {
-            console.log( "Fehlerhafter Barcode!" );
+         if( !$scope.editableCustomer.firstName || !$scope.editableCustomer.lastName ) {
             $scope.ixoidMessages.push( {
-               text : "Fehlerhafter Barcode!",
+               text : "Bitte Name und Vorname angeben!",
                type : "error"
             } );
             return;
          }
 
-         var barcodeObject = db.createBarcode( $scope.editableCustomer.barcode, $scope.editableCustomer.id );
-         barcodeObject.put();
+         if( $scope.originalBarcode != $scope.editableCustomer.barcode ) {
+             if( !db.checkBarcodeString( $scope.editableCustomer.barcode ) ) {
+                 console.log( "Fehlerhafter Barcode!" );
+                 $scope.ixoidMessages.push( {
+                         text : "Fehlerhafter Barcode!",
+                             type : "error"
+                             } );
+                 return;
+             }
+             else {
+                 // TODO: check if new barcode is already in use
+                 // TODO: delete original barcode
+                 var barcodeObject = db.createBarcode( $scope.editableCustomer.barcode, $scope.editableCustomer.id );
+                 barcodeObject.put();
+             }
+         }
+
          return internalSaveCustomerAndNew();
       };
    } ];

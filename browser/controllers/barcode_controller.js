@@ -30,7 +30,8 @@ define( [ "underscore" ], function( _ ) {
           $scope.configuration.put()
           .then( function( conf ) {
               // $location.path( "/barcode?startCounter=" + startCounter + "&endCounter=" + endCounter );
-              window.location = "/barcode?startCounter=" + startCounter + "&endCounter=" + endCounter + "&labelTitle=" + companyName;
+              window.location = "/barcode?startCounter=" + startCounter + "&endCounter=" + endCounter + "&labelTitle=" + companyName +
+                  "&computeChecksum=x";
           });
        };
    } ];

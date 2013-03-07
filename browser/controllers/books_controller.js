@@ -54,22 +54,31 @@ define( [ "underscore" ], function( _ ) {
 
         $scope.saveBook = function() {
           console.log( "Called saveBook." );
-          if( $scope.originalBarcode == $scope.editableBook.barcode ) {
-            $scope.editableBook.put();
+
+         if( !$scope.editableBook.title || !$scope.editableBook.signature ) {
+            $scope.ixoidMessages.push( {
+               text : "Bitte Titel und Nummer angeben.",
+               type : "error"
+            } );
             return;
+         }
+
+          if( $scope.originalBarcode != $scope.editableBook.barcode ) {
+              if( ! db.checkBarcodeString( $scope.editableBook.barcode ) ) {
+                  console.log( "Fehlerhafter Barcode!" );
+                  $scope.ixoidMessages.push( { text: "Fehlerhafter Barcode.", type: "error" } );
+                  return;
+              }
+           
+              // TODO: check for duplicate barcodes
+              // TODO: delete old barcode
+              var barcodeObject = db.createBarcode( $scope.editableBook.barcode, $scope.editableBook.id );
+              barcodeObject.put();
           }
 
-          if( ! db.checkBarcodeString( $scope.editableBook.barcode ) ) {
-            console.log( "Fehlerhafter Barcode!" );
-            $scope.ixoidMessages.push( { text: "Fehlerhafter Barcode!", type: "error" } );
-            return;
-          }
-
-          var barcodeObject = db.createBarcode( $scope.editableBook.barcode, $scope.editableBook.id );
-          barcodeObject.put();
           $scope.editableBook.put();
           $scope.originalBarcode = $scope.editableBook.barcode;
-          $scope.ixoidMessages.push( { text: "Buch gespeichert!", type: "success" } );
+          $scope.ixoidMessages.push( { text: "Buch gespeichert.", type: "success" } );
         };
    } ];
 

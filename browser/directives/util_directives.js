@@ -106,8 +106,12 @@ define(
                               console.log( "watch" );
                               console.log( message );
                               scope.actions = fillActions();
+                              var timeoutMilliseconds = 3000;
+                              if( scope.actions && scope.actions.length > 0 ) {
+                                  timeoutMilliseconds = 6000;
+                              } 
                               if( message != null ) {
-                                 $timeout( scope.dismiss, 3000 );
+                                 $timeout( scope.dismiss, timeoutMilliseconds );
                                  scope.text = message.text || message.message;
                                  scope.heading = message.heading || scope.fallbackHeading;
 

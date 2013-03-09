@@ -23,7 +23,6 @@ define(
          return {
             link : function( scope, element, attrs ) {
                jquery( element[ 0 ] ).focus();
-               console.log( "set focus" );
             }
          };
       };
@@ -90,21 +89,21 @@ define(
                            };
 
                            scope.dismiss = function() {
-                              console.log( "dismiss" );
                               jquery( element[ 0 ] ).hide();
                               // jquery( element[ 0 ] ).alert( 'close' );
+                              if( scope.message.abort ) {
+                                 scope.message.abort();
+                              }
                               scope.$emit( 'ixoidMessage.messageDismissed', scope.message );
+                              
                            };
 
                            scope.apply = function( action ) {
-                              console.log( "apply" );
                               action.apply();
                               scope.dismiss();
                            };
 
                            scope.$watch( 'message', function( message ) {
-                              console.log( "watch" );
-                              console.log( message );
                               scope.actions = fillActions();
                               var timeoutMilliseconds = 3000;
                               if( scope.actions && scope.actions.length > 0 ) {

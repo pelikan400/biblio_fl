@@ -1,6 +1,9 @@
 barcode_links.txt
 biblio_fl_inital_export_json.txt
 
+db
+db_archive
+
 *.py[cod]
 *~
 

@@ -61,9 +61,10 @@ define( [ "underscore" ], function( _ ) {
       } );
    };
 
-   RestDB.prototype.deleteDocument = function( doc ) {
+   RestDB.prototype.deleteDocument = function( id ) {
       var url = this.databaseUrl + "/" + id;
-      return $http( {
+      console.log( "http DELETE  " + url );
+      return this.$http( {
          method : "DELETE",
          url : url
       } );

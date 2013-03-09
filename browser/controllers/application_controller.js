@@ -26,6 +26,46 @@ define( function() {
         ];
 
         $scope.ixoidMessages = [];
+        
+        $scope.errorMessage = function( msg ) {
+           console.log( msg );
+           $scope.ixoidMessages.push( {
+              text: msg,
+              type: "error"
+           });
+        };
+        
+        $scope.warningMessage = function( msg ) {
+           console.log( msg );
+           $scope.ixoidMessages.push( {
+              text: msg,
+              type: "warning"
+           });
+        };
+        
+        $scope.successMessage = function( msg ) {
+           console.log( msg );
+           $scope.ixoidMessages.push( {
+              text: msg,
+              type: "success"
+           });
+        };
+        
+        $scope.retryPromiseMessage = function( msg, btnOk, btnCancel ) {
+           console.log( msg );
+           var deferred = q.defer();
+           $scope.ixoidMessages.push( { 
+              text : msg, 
+              type: "warning",
+              retry: function() { 
+                 deferred.resolve( true );
+              },
+              abort: function() {
+                 deferred.resolve( false );
+              }
+           });
+           return deferred.promise;
+        };
    } ];
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -163,18 +163,18 @@ class BarcodeEAN( Barcode ) :
 
 class BarcodeITF( Barcode ) :
     encodingList = [
-        "11331",
-        "31113",
-        "13113",
-        "33111",
-        "11313",
-        "31311",
-        "13311",
-        "11133",
-        "31131",
-        "13131",
+        "11991",
+        "91119",
+        "19119",
+        "99111",
+        "11919",
+        "91911",
+        "19911",
+        "11199",
+        "91191",
+        "19191",
         "1111", # start
-        "311"  # stop
+        "911"  # stop
     ]
 
     def __init__( self, computeChecksum = False ) :
@@ -235,7 +235,7 @@ class BarcodeITF( Barcode ) :
 
     def encode( self, inputText ) :
         # replace all non number symbols with 0 padd left if necessary and compute checksum
-        text = self.paddWithZeroAndComputeChecksum( inputText )
+        text = self.paddWithZeroAndComputeChecksum( inputText, minimumPadding = 6 )
         text, symbols = self.partitionBase10( text )
         return text, self.internalEncode( symbols )
 
@@ -407,7 +407,7 @@ class Barcode128( Barcode ) :
     def encode( self, inputText ) :
         if self.checkIfOnlyNumbers( inputText ) :
             # text = inputText
-            text = self.paddWithZeroAndComputeChecksum( inputText, minimumPadding = 4 )
+            text = self.paddWithZeroAndComputeChecksum( inputText, minimumPadding = 6 )
             text, symbols = self.convertInputNumbersToSymbols( text )
             return text, self.internalEncode( symbols, 105 )
         else:
@@ -419,50 +419,50 @@ class Barcode128( Barcode ) :
 
 class Barcode39( Barcode ) :
     encodingMap = {
-        "0" :  "1113313111",
-        "1" :  "3113111131",
-        "2" :  "1133111131",
-        "3" :  "3133111111",
-        "4" :  "1113311131",
-        "5" :  "3113311111",
-        "6" :  "1133311111",
-        "7" :  "1113113131",
-        "8" :  "3113113111",
-        "9" :  "1133113111",
-        "A" :  "3111131131",
-        "B" :  "1131131131",
-        "C" :  "3131131111",
-        "D" :  "1111331131",
-        "E" :  "3111331111",
-        "F" :  "1131331111",
-        "G" :  "1111133131",
-        "H" :  "3111133111",
-        "I" :  "1131133111",
-        "J" :  "1111333111",
-        "K" :  "3111111331",
-        "L" :  "1131111331",
-        "M" :  "3131111311",
-        "N" :  "1111311331",
-        "O" :  "3111311311",
-        "P" :  "1131311311",
-        "Q" :  "1111113331",
-        "R" :  "3111113311",
-        "S" :  "1131113311",
-        "T" :  "1111313311",
-        "U" :  "3311111131",
-        "V" :  "1331111131",
-        "W" :  "3331111111",
-        "X" :  "1311311131",
-        "Y" :  "3311311111",
-        "Z" :  "1331311111",
-        "-" :  "1311113131",
-        "." :  "3311113111",
-        " " :  "1331113111",
-        "$" :  "1313131111",
-        "/" :  "1313111311",
-        "+" :  "1311131311",
-        "%" :  "1113131311",
-        "*" :  "1311313111" }
+        "0" :  "1112212111",
+        "1" :  "2112111121",
+        "2" :  "1122111121",
+        "3" :  "2122111111",
+        "4" :  "1112211121",
+        "5" :  "2112211111",
+        "6" :  "1122211111",
+        "7" :  "1112112121",
+        "8" :  "2112112111",
+        "9" :  "1122112111",
+        "A" :  "2111121121",
+        "B" :  "1121121121",
+        "C" :  "2121121111",
+        "D" :  "1111221121",
+        "E" :  "2111221111",
+        "F" :  "1121221111",
+        "G" :  "1111122121",
+        "H" :  "2111122111",
+        "I" :  "1121122111",
+        "J" :  "1111222111",
+        "K" :  "2111111221",
+        "L" :  "1121111221",
+        "M" :  "2121111211",
+        "N" :  "1111211221",
+        "O" :  "2111211211",
+        "P" :  "1121211211",
+        "Q" :  "1111112221",
+        "R" :  "2111112211",
+        "S" :  "1121112211",
+        "T" :  "1111212211",
+        "U" :  "2211111121",
+        "V" :  "1221111121",
+        "W" :  "2221111111",
+        "X" :  "1211211121",
+        "Y" :  "2211211111",
+        "Z" :  "1221211111",
+        "-" :  "1211112121",
+        "." :  "2211112111",
+        " " :  "1221112111",
+        "$" :  "1212121111",
+        "/" :  "1212111211",
+        "+" :  "1211121211",
+        "%" :  "1112121211",
+        "*" :  "1211212111" }
     
     def __init__( self ) : 
         Barcode.__init__( self )
@@ -493,10 +493,10 @@ class Label( object ) :
         self.ctx.set_line_width( 1 )
         self.ctx.set_source_rgb( 0, 0, 0 )
         self.barcodeRendererList = []
-        self.barcodeRendererList.append( Barcode128( computeChecksum = options.computeChecksum ) )
-        # self.barcodeRendererList.append( BarcodeITF( computeChecksum = options.computeChecksum ) )
+        # self.barcodeRendererList.append( Barcode128( computeChecksum = options.computeChecksum ) )
+        self.barcodeRendererList.append( BarcodeITF( computeChecksum = options.computeChecksum ) )
         # self.barcodeRendererList.append( Barcode39() )
-        # self.barcodeRendererList.append( BarcodeEAN() )
+        # self.barcodeRendererList.append( BarcodeEAN( computeChecksum = True ) )
         self.barcodeRendererCounter = 0
 
     def showText( self, x, y, text, textSize = 10, align = "center" ) :
@@ -524,8 +524,12 @@ class Label( object ) :
 
     def drawSymbolEncoding( self, x, y, symbolEncoding ) :
         isBlack = True
+        o0 = ord( '0' )
         for barC in symbolEncoding :
-            barWidth = self.barWidth * ( ord( barC ) - ord( '0' ) )
+            bw = ord( barC ) - o0
+            if bw == 9 :
+               bw = 2.5
+            barWidth = self.barWidth * bw
             x, y = self.drawBar( x, y, isBlack, barWidth )
             isBlack = not isBlack
         return x, y
@@ -533,8 +537,13 @@ class Label( object ) :
     def symbolExtent( self, symbolEncoding ) :
         isBlack = True
         symbolWidth = 0
+        o0 = ord( '0' )
         for barC in symbolEncoding :
-            symbolWidth += self.barWidth * ( ord( barC ) - ord( '0' ) )
+            bw = ord( barC ) - o0
+            if bw == 9 :
+               bw = 2.5
+            barWidth = self.barWidth * bw
+            symbolWidth += barWidth
             if not isBlack :
                 symbolWidth += 0.2
             isBlack = not isBlack

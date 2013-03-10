@@ -4,7 +4,7 @@ define( [ "underscore" ], function( _ ) {
    'use strict';
 
      var controller = [ '$scope', '$routeParams', '$location', "ixoidDatabase", "$q",
-                        function BooksController( $scope, $routeParams, $location, db, q ) {
+                        function BooksController( $scope, $routeParams, $location, db, q ) {        
         console.log( "BooksController initialized." );
         $scope.$root.activeMenuId = "books";
 
@@ -15,40 +15,41 @@ define( [ "underscore" ], function( _ ) {
         $scope.bookListTitle = "";
         $scope.editableBook = null;
 
-        if( $routeParams.action == "listIssued" ) {
-            db.scanBooks( "ISSUED" )
-            .then( function( bookList ) { 
-                var customerIdList = [];
-                $scope.bookListTitle = "Liste aller ausgeliehenen Büchern";
-                $scope.bookList = bookList;
-                $scope.bookList.sort( function( r1, r2 ) {
-                    return r1.dueDate.getTime() - r2.dueDate.getTime();
-                });
-                _.each( bookList, function( book ) {
-                    customerIdList.push( book.issuedBy );
-                });
-                db.getCustomersByIdList( customerIdList ) 
-                .then( function( customers ) { 
-                    _.each( customers, function( customer, idx ) {
-                       $scope.bookList[ idx ].issuedByCustomer = customer;
-                   }); 
-                }); 
-            });
-        }
-        else if( $routeParams.action == "list" ) {
-          // get book list
-        }
-        else if( $routeParams.action == "new" ) {
-          $scope.editableBook = db.createBook();
-          $scope.originalBarcode = $scope.editableBook.barcode;
-        }
-        else if( $routeParams.action == "edit" && $routeParams.bookId ) {
-          db.getBookById( $routeParams.bookId ) 
-          .then( function( book ) {
-             $scope.editableBook = book;
-             $scope.originalBarcode = $scope.editableBook.barcode;
-          } );
-        }
+        var routeAction = function() {
+           if( $routeParams.action == "listIssued" ) {
+              db.scanBooks( "ISSUED" )
+              .then( function( bookList ) { 
+                  var customerIdList = [];
+                  $scope.bookListTitle = "Liste aller ausgeliehenen Büchern";
+                  $scope.bookList = bookList;
+                  $scope.bookList.sort( function( r1, r2 ) {
+                      return r1.dueDate.getTime() - r2.dueDate.getTime();
+                  });
+                  _.each( bookList, function( book ) {
+                      customerIdList.push( book.issuedBy );
+                  });
+                  db.getCustomersByIdList( customerIdList ) 
+                  .then( function( customers ) { 
+                      _.each( customers, function( customer, idx ) {
+                         $scope.bookList[ idx ].issuedByCustomer = customer;
+                     }); 
+                  }); 
+              });
+          }
+          else if( $routeParams.action == "list" ) {
+            // get book list
+          }
+          else if( $routeParams.action == "new" ) {
+            $scope.newBook();
+          }
+          else if( $routeParams.action == "edit" && $routeParams.bookId ) {
+            db.getBookById( $routeParams.bookId ) 
+            .then( function( book ) {
+               $scope.editableBook = book;
+               $scope.originalBarcode = $scope.editableBook.barcode;
+            } );
+          }
+        };
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -101,7 +102,9 @@ define( [ "underscore" ], function( _ ) {
            }
            
            if( $scope.editableBook.barcode ) {
-              if( ! db.checkBarcodeString( $scope.editableBook.barcode ) ) {
+              if( $scope.editableBook.barcode.length < 6 || 
+                  $scope.editableBook.barcode.charAt( 0 ) == "0" || 
+                  ! db.checkBarcodeString( $scope.editableBook.barcode ) ) {
                  $scope.errorMessage( "Fehlerhafter Barcode." );
                  return promiseFalse;
              }
@@ -142,7 +145,7 @@ define( [ "underscore" ], function( _ ) {
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         $scope.deleteBook = function() {
-          return $scope.retryPromiseMessage( "Wollen Sie das Buch löschen wollen?" )
+          return $scope.retryPromiseMessage( "Wollen Sie das Buch wirklich löschen?" )
           .then( function( result ) {
              if( result ) {
                 return db.createBarcode( $scope.editableBook.barcode ).del()
@@ -160,6 +163,13 @@ define( [ "underscore" ], function( _ ) {
              }
           });
          };
+         
+         $scope.newBook = function() {
+            $scope.editableBook = db.createBook();
+            $scope.originalBarcode = $scope.editableBook.barcode;
+         };
+         
+         routeAction();
      } ];
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////

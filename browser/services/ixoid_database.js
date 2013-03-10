@@ -143,6 +143,7 @@ define( [
 
          Book.idPrefix = "book-";
 
+         
          Book.prototype.afterGet = function() {
             if( this.dueDate ) {
                this.dueDate = new Date( this.dueDate );
@@ -155,6 +156,47 @@ define( [
             }
          };
 
+         
+         Book.prototype.getIssuedWeeks = function() {
+            var weeks = 0;
+            if( this.issuedStatus == "ISSUED" ) {
+               var oneWeekInMilliseconds = 1000 * 3600 * 24 * 7;
+               var now = new Date();
+               var deltaIssued = now.getTime() - this.issueDate.getTime();
+               weeks = Math.floor( deltaIssued / oneWeekInMilliseconds );
+            }
+            
+            return weeks;
+         };
+
+         Book.prototype.ISSUED = "ISSUED";
+         Book.prototype.RETURNED = "RETURNED";
+         
+         
+         Book.prototype.isIssued = function() {
+            return this.issuedStatus == this.ISSUED;
+         };
+
+         
+         Book.prototype.issueAction = function( customerId ) {
+            var now = new Date();
+            if( !now.isSameDay( this.returnDate ) || this.issuedBy != customerId ) {
+               this.issuedDate = now;
+            }
+            this.dueDate = now.addDays( 14 );
+            this.issuedStatus = this.ISSUED;
+            this.issuedBy = customerId;
+         };
+
+         
+         Book.prototype.returnAction = function() {
+            var now = new Date();
+            this.issuedStatus = this.RETURNED;
+            this.returnDate = now;
+            this.dueDate = null;
+         };
+
+         
          // //////////////////////////////////////////////////////////////////////////////////////////////////
 
          function Customer( id ) {
@@ -193,22 +235,6 @@ define( [
          };
 
          Customer.prototype.schoolClassMap = {
-            "0" : "keine",
-
-            "2012a" : "1a",
-            "2012b" : "1b",
-
-            "2011a" : "2a",
-            "2011b" : "2b",
-
-            "2010a" : "3a",
-            "2010b" : "3b",
-
-            "2009a" : "4a",
-            "2009b" : "4b"
-         };
-
-         Customer.prototype.schoolClassReverseMap = {
             "0" : "keine",
 
             "2012a" : "1a",
@@ -351,9 +377,6 @@ define( [
                return false;
             }
             var barcodeStringLength = barcodeString.length;
-            if( barcodeStringLength < 4 || barcodeStringLength > 6 ) {
-               return false;
-            }
             var checksum = 0;
             var charCodeZero = "0".charCodeAt( 0 );
             var pos = 0;
@@ -449,7 +472,7 @@ define( [
             },
 
             createCirculation : function( book, customer ) {
-               return new Circulation( id );
+               return new Circulation( book, customer );
             },
             getAllCirculations : function() {
                return getAllDocuments( Circulation );

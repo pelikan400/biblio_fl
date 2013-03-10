@@ -15,7 +15,7 @@
 			<a href="#/customers/edit/{{customer.id}}">{{customer.firstName}}
 				{{customer.lastName}}</a>
 		</p>
-		<p>Klasse: {{customer.schoolClass}}</p>
+		<p>Klasse: {{customer.schoolClassMap[ customer.schoolClass ]}}</p>
 		<p>{{customer.notes}}</p>
 	</div>
 </div>
@@ -130,8 +130,6 @@
 					<td>{{book.dueDate.asGermanDate()}}</td>
 					<td>{{book.notes}}</td>
 					<td>{{book.barcode}}</td>
-					<td><a href="#/books/edit/{{book.id}}"><i
-							class="icon-book"></i></a></td>
 				</tr>
 			</tbody>
 		</table>

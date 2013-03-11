@@ -11,7 +11,7 @@ class RootApplication( object ):
 
     # def readBarcodeOptions( self, **kwargs ) :
     def readBarcodeOptions( self, description = "", labels = "", labelSheet = "avery4780", computeChecksum = "",
-                            bearerBar = "",
+                            bearerBar = "", symbology = "Code128",
                             withBorderLines = "", labelTitle = "Bibliothek KGS Forster Linde", 
                             startCounter = "0", endCounter = "20" ) :
         options = DictMixin()
@@ -20,10 +20,12 @@ class RootApplication( object ):
         options.labelSheet = labelSheet
         options.withBorderLines = bool( withBorderLines )
         options.labelTitle = labelTitle
+        print "'%s' has type %s" % ( options.labelTitle, type( options.labelTitle ) )
         options.startCounter = int( startCounter )
         options.endCounter = int( endCounter )
         options.computeChecksum = bool( computeChecksum )
         options.bearerBar = bool( bearerBar )
+        options.symbology = symbology
         return options
         
     def barcode( self, **kwargs ) :

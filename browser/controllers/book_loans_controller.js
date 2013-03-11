@@ -16,19 +16,14 @@ define( [ "jquery" ], function( jquery ) {
       $scope.searchedCustomers = null;
       $scope.searchedCustomersMap = null;
   
-      // $scope.ixoidMessages.push( {
-      //    text : "Suchtext ist zu kurz!",
-      //    heading: "Sicherheitsabfrage", 
-      //    retry: function() {
-      //       console.log( "Hey, retry was called!!" );
-      //       $scope.ixoidMessages.push( {
-      //          text : "OK, danke!",
-      //          type : "success"
-      //       } );
-      //    },
-      //    type : "warning"
-      // } );
-      
+      // /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      $scope.showCustomerById = function( customerId ) {
+         var newPath = "/issues/show/" + customerId;
+         console.log( "change path to: " + newPath );
+         $location.path( newPath );
+      };
+
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       $scope.checkInCustomerById = function( customerId ) {
@@ -43,13 +38,18 @@ define( [ "jquery" ], function( jquery ) {
          });
       };
 
-      console.log( $routeParams );
-      var customerId = $routeParams.customerId;
-      if( $routeParams.action == "show" && customerId ) {
-         console.log( "check in customer with id: " + customerId );
-         $scope.checkInCustomerById( customerId );
+      // /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      var actionRoute = function() {
+         console.log( $routeParams );
+         var customerId = $routeParams.customerId;
+         if( $routeParams.action == "show" && customerId ) {
+            console.log( "check in customer with id: " + customerId );
+            $scope.checkInCustomerById( customerId );
+         };
+         
       };
-      
+
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       var isDigit = function( c ) {
@@ -69,17 +69,29 @@ define( [ "jquery" ], function( jquery ) {
                $scope.issuedBooks = [];
                $scope.returnedBooks = [];
                books.forEach( function( book ) {
-                  if( book.issuedStatus == "RETURNED" ) {
-                     $scope.returnedBooks.push( book );
+                  if( book.isIssued() ) {
+                     $scope.issuedBooks.push( book );
                   }
                   else {
-                     $scope.issuedBooks.push( book );
+                     $scope.returnedBooks.push( book );
                   }
                } );
                $scope.returnedBooks.sort( function( r1, r2 ) { 
+                  if( !r1.returnDate ) {
+                     return 1;
+                  }
+                  if( !r2.returnDate ) {
+                     return -1;
+                  }
                    return r2.returnDate.getTime() - r1.returnDate.getTime();
                });
                $scope.issuedBooks.sort( function( r1, r2 ) { 
+                  if( !r1.returnDate ) {
+                     return 1;
+                  }
+                  if( !r2.returnDate ) {
+                     return -1;
+                  }
                    return r2.issueDate.getTime() - r1.issueDate.getTime();
                });
                console.log( $scope.issuedBooks );
@@ -107,76 +119,50 @@ define( [ "jquery" ], function( jquery ) {
         });
      };
      
-     
-     // /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-     $scope.checkInCustomerByIndex = function( customerIndex ) {
-        var customer = $scope.searchedCustomers[ customerIndex ];
-        if( customer ) {
-           $location.path( "#/issues/show/" + customer.id  );
-        }
-     };
-
       // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       var processBook = function( book, searchText ) {
          console.log( "book id:" + book.id );
          console.log( "issued by: " + book.issuedBy );
-         if( book.issuedStatus == "ISSUED" ) {
-            console.log( "book is ISSUED will be RETURNED" );
-            // book was ISSUED and is returned now
-            // change the logged in customer to the one specified on the book
-            book.issuedStatus = "RETURNED";
-            book.returnDate = new Date();
-            book.dueDate = null;
-            book.put().then( function( book ) {
-               // TODO: check for errors or database updates
+         if( book.isIssued() ) {
+            console.log( "book is ISSUED  -> will be RETURNED" );
+            book.returnAction();
+            return book.put()
+            .then( function( book ) {
+               $scope.infoMessage( "'" + book.title + "' zurückgebracht." );
+               // change the logged in customer to the one specified on the book
                if( !$scope.customer || book.issuedBy != $scope.customer.id ) {
-                  console.log( "get the customer who ISSUED the book" );
+                  // the customer is only needed because of createCirculation
                   return db.getCustomerById( book.issuedBy ).then( function( customer ) {
-                     console.log( "change checked in customer" );
-                     $scope.customer = customer;
+                     $scope.infoMessage( customer.barcode + ": " + customer.firstName + " " + customer.lastName + " geladen."  );
+                     $scope.showCustomerById( book.issuedBy );
                      return customer;
                   } );
                }
                else {
+                  fetchIssuedBooks();
                   return $scope.customer;
                }
-            } ).then( function( customer ) {
-                db.createCirculation( book, customer ).put();
-            } ).then( function() {
-               fetchIssuedBooks();
+            } )
+            .then( function( customer ) {
+                return db.createCirculation( book, customer ).put();
             } );
          }
          else if( !$scope.customer ) {
             console.log( "no customer logged in and book is NOT ISSUED" );
             // no customer logged so there is no destination
-            // TODO: show the book details in searchedBooks
             $scope.searchText = searchText;
             $scope.searchedBooks = [ book ];
             return null;
          }
          else {
+            $scope.infoMessage( "'" + book.title + "' ausgeliehen." );
             console.log( "book is RETURNED and will be ISSUED" );
             console.log( "checked in customer id: " + $scope.customer.id );
-            // one customer is logged in, book was RETURNED and will be ISSUED
-            if( book.issuedBy == $scope.customer.id ) {
-               book.issueCounter += 1;
-               // special case where the book is RETURNED and ISSUED by the same
-               // person
-               // if this is done on the same day, then it is a prolongation
-               // TODO: handle PROLONGATION
-            }
-            else {
-            }
 
-            book.issuedStatus = "ISSUED";
-            book.issueDate = new Date();
-            book.dueDate = book.issueDate.addDays( 14 );
-            book.issueCounter = 1;
-            var saveOldCustomer = function( oldCustomer ) {
-               if( book.issuedBy ) {
-                  return db.getCustomerById( oldCustomer ).then( function( customer ) {
+            var removeBookFromPreviousCustomerAndAddToCurrent = function( previousCustomerId ) {
+               if( previousCustomerId && previousCustomerId != $scope.customer.id ) {
+                  return db.getCustomerById( previousCustomerId ).then( function( customer ) {
                      console.log( "remove book from old customer" );
                      customer.removeBook( book.id );
                      console.log( "save old customer" );
@@ -189,21 +175,28 @@ define( [ "jquery" ], function( jquery ) {
                }
             };
 
-            saveOldCustomer( book.issuedBy )
-            .then( function( customer ) {
-               console.log( "save book" );
-               book.issuedBy = $scope.customer.id;
-               return book.put()
-               .then( function( book ) {
-                   db.createCirculation( book, customer ).put();
-                   return book;
-               } );
-            } ).then( function() {
+            var previousCustomerId = book.issuedBy;
+            book.issueAction( $scope.customer.id );
+            
+            console.log( "Save book" );
+            return book.put()
+            .then( function( book ) {
+               console.log( "Create circulation." );
+               return db.createCirculation( book, $scope.customer ).put();
+            } )
+            .then( function() {
+               console.log( "remove book from previous customer." );
+               return removeBookFromPreviousCustomerAndAddToCurrent( previousCustomerId ); 
+            } )                  
+            .then( function() {
                console.log( "add book to new customer" );
                $scope.customer.addBook( book.id );
                console.log( "save new customer" );
+               $scope.infoMessage( "'" + book.title + "' ausgeliehen." );
                return $scope.customer.put();
-            } ).then( function() {
+            } )
+            .then( function() {
+               console.log( "fetch issued books" );
                return fetchIssuedBooks();
             } );
          }
@@ -220,9 +213,11 @@ define( [ "jquery" ], function( jquery ) {
                .then( function( customer ) {
                   if( customer ) {
                      $location.path( "/issues/show/" + customer.id ).replace();
+                     $scope.infoMessage( customer.barcode + ": " + customer.firstName + " " + customer.lastName + " geladen."  );
                   }
                   else {
                      $location.path( "/issues" );
+                     $scope.warningMessage( searchText + ": Kein Kunde mit diesem Barcode gefunden." );
                   }
                   // $scope.customer = customer;
                   // fetchIssuedBooks();
@@ -238,6 +233,9 @@ define( [ "jquery" ], function( jquery ) {
                      console.log( "found book: " + book.title );
                      processBook( book, searchText );
                   }
+                  else {
+                     $scope.warningMessage( searchText + ": Kein Buch mit diesem Barcode gefunden." );
+                  }
                } );
             }
             ;
@@ -246,7 +244,7 @@ define( [ "jquery" ], function( jquery ) {
             searchText = searchText.substring( 1 );
             // console.log( "Search for Persons: " + searchText );
             if( searchText.length < 3 ) {
-               $scope.ixoidMessages.push( { text: "Suchtext ist zu kurz!", type: "error" } );
+               $scope.errorMessage( "Suchtext ist zu kurz!" );
                return;
             }
             searchForCustomers( searchText );
@@ -254,7 +252,7 @@ define( [ "jquery" ], function( jquery ) {
          else {
             // console.log( "Text search: '" + searchText + "'" );
             if( searchText.length < 3 ) {
-               $scope.ixoidMessages.push( { text: "Suchtext ist zu kurz!", type: "error" } );
+               $scope.errorMessage( "Suchtext ist zu kurz!" );
                return;
             }
             $scope.searchText = searchText;
@@ -266,6 +264,8 @@ define( [ "jquery" ], function( jquery ) {
 
          $scope.generalInputText = "";
       };
+      
+      actionRoute();
    } ];
 
    // /////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -82,14 +82,19 @@
 			<div class="control-group">
 				<label class="control-label">Barcode</label>
 				<div class="controls">
-					<input type="text" data-ixoid-disable-submit-on-enter ng-model="editableBook.barcode" />
+					<input type="text" data-ixoid-disable-submit-on-enter
+						ng-model="editableBook.barcode" />
 				</div>
 			</div>
 
 			<div class="control-group">
 				<div class="controls">
-					<button type="submit" class="btn btn-primary" data-ng-click="saveBook()">Speichern</button>
-               <button type="submit" class="btn btn-danger" data-ng-click="deleteBook()">Löschen</button>
+					<button type="submit" class="btn btn-primary"
+						data-ng-click="saveBook()">Speichern</button>
+					<button type="submit" class="btn btn-danger"
+						data-ng-click="deleteBook()">Löschen</button>
+					<button type="submit" class="btn btn-info"
+						data-ng-click="newBook()">Neues Buch</button>
 				</div>
 			</div>
 		</form>
@@ -123,8 +128,8 @@
 					<td>{{book.signature}}</td>
 					<td>{{book.issueDate.asGermanDate()}}</td>
 					<td>{{book.dueDate.asGermanDate()}}</td>
-					<td>1</td>
-					<td><a href="#/customers/edit/{{book.issuedByCustomer.id}}">{{book.issuedByCustomer.firstName}}
+					<td>{{book.getIssuedWeeks()}}</td>
+					<td><a href="#/issues/show/{{book.issuedByCustomer.id}}">{{book.issuedByCustomer.firstName}}
 							{{book.issuedByCustomer.lastName}}</a></td>
 				</tr>
 			</tbody>

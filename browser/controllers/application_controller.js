@@ -51,6 +51,14 @@ define( function() {
            });
         };
         
+        $scope.infoMessage = function( msg ) {
+           console.log( msg );
+           $scope.ixoidMessages.push( {
+              text: msg,
+              type: "success"
+           });
+        };
+        
         $scope.retryPromiseMessage = function( msg, btnOk, btnCancel ) {
            console.log( msg );
            var deferred = q.defer();

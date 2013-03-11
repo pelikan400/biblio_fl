@@ -159,7 +159,7 @@ define( [
          
          Book.prototype.getIssuedWeeks = function() {
             var weeks = 0;
-            if( this.issuedStatus == "ISSUED" ) {
+            if( this.issuedStatus == "ISSUED" && this.issueDate ) {
                var oneWeekInMilliseconds = 1000 * 3600 * 24 * 7;
                var now = new Date();
                var deltaIssued = now.getTime() - this.issueDate.getTime();
@@ -181,7 +181,7 @@ define( [
          Book.prototype.issueAction = function( customerId ) {
             var now = new Date();
             if( !now.isSameDay( this.returnDate ) || this.issuedBy != customerId ) {
-               this.issuedDate = now;
+               this.issueDate = now;
             }
             this.dueDate = now.addDays( 14 );
             this.issuedStatus = this.ISSUED;

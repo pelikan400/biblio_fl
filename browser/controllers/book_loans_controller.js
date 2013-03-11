@@ -167,13 +167,6 @@ define( [ "jquery" ], function( jquery ) {
                      customer.removeBook( book.id );
                      console.log( "save old customer" );
                      return customer.put();
-                  } )
-                  .then( function() {
-                     console.log( "add book to new customer" );
-                     $scope.customer.addBook( book.id );
-                     console.log( "save new customer" );
-                     $scope.infoMessage( "'" + book.title + "' ausgeliehen." );
-                     return $scope.customer.put();
                   } );
                }
                else {
@@ -194,7 +187,15 @@ define( [ "jquery" ], function( jquery ) {
             .then( function() {
                console.log( "remove book from previous customer." );
                return removeBookFromPreviousCustomerAndAddToCurrent( previousCustomerId ); 
-            } ).then( function() {
+            } )                  
+            .then( function() {
+               console.log( "add book to new customer" );
+               $scope.customer.addBook( book.id );
+               console.log( "save new customer" );
+               $scope.infoMessage( "'" + book.title + "' ausgeliehen." );
+               return $scope.customer.put();
+            } )
+            .then( function() {
                console.log( "fetch issued books" );
                return fetchIssuedBooks();
             } );

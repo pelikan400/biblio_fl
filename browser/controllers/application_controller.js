@@ -6,7 +6,8 @@ define( function() {
           { id: "issues", name : "Ausleihen", href: "#/issues" },
           { id: "books", name : "Bücher",
             submenu: [ 
-             { id: "", name : "Liste aller ausgeliehenen Büchern", href: "#/books/listIssued" },
+             { id: "", name : "Liste aller ausgeliehenen Bücher", href: "#/books/listIssued" },
+             { id: "", name : "Liste aller Bücher", href: "#/books/listAll" },
              { id: "", name : "Neues Buch anlegen", href: "#/books/new" }
             ]
           },

@@ -36,7 +36,7 @@ define( [ "underscore" ], function( _ ) {
                   }); 
               });
           }
-          else if( $routeParams.action == "list" ) {
+          else if( $routeParams.action == "listAll" ) {
             // get book list
           }
           else if( $routeParams.action == "new" ) {

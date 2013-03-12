@@ -174,7 +174,10 @@ class Resource( object ):
        
       
    def PUT( self, *args ):
-      print( "%s with args: %s" % ( "PUT", args ) )
+      return self.POST( *args )
+   
+   def POST( self, *args ):
+      print( "%s with args: %s" % ( "POST", args ) )
       role = self.getRole()
       cherrypy.response.headers[ "Content-Type" ] = "application/json;charset=UTF-8"
       if len( args ) == 1 :

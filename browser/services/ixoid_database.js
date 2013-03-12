@@ -3,28 +3,24 @@
 define( [
    "angular", "underscore", "./restDB", "./dummyData"
 ], function( angular, _, dbm, dummyData ) {
-   var circulations = [];
 
    var service = [
       "$q", "$timeout", "$http", "$resource", function( q, timeout, $http, $resource ) {
 
+         var db = null;
+         
          // //////////////////////////////////////////////////////////////////////////////////////////////////
-
-         // API proposal:
-         // createBook, updateBook, readBook, deleteBook
-         // createBookBarcode, getBookBarcode, deleteBookBarcode
-         // create, update, read, erase (delete is reserved)
-         // book,
-         // document based
-
-         var db = dbm.db( $http, "/db" );
 
          // TODO:
          // - implement conditional PUT (use ETag)
          // - every PUT will also save meta infos
          // - minimize and obfuscate the javascript code
-         // - what about authentication and security (read-only vs. read-write)
 
+         
+         var now = function() {
+            return new Date();
+         };
+         
          // //////////////////////////////////////////////////////////////////////////////////////////////////
 
          function randomUUID() {
@@ -80,7 +76,7 @@ define( [
                if( doc ) {
                   _.extend( self, doc );
                   self.afterGet();
-                  console.log( self );
+                  // console.log( self );
                   return self;
                }
                else {
@@ -91,19 +87,20 @@ define( [
 
          Document.prototype.put = function() {
             var self = this;
+            self.lastModified = now();
             return db.putDocument( self.id, self ).then( function( doc ) {
-               console.log( "Document.put returned with:" );
-               console.log( doc );
-               console.log( typeof( doc ) );
+               // console.log( "Document.put returned with:" );
+               // console.log( doc );
+               // console.log( typeof( doc ) );
                if( doc ) {
                   if( typeof( doc ) != "object" ) {
                      doc = JSON.parse( doc );
                   }
-                  console.log( self );
-                  console.log( doc );
+                  // console.log( self );
+                  // console.log( doc );
                   console.log( typeof( doc ) );
                   _.extend( self, doc );
-                  console.log( self );
+                  // console.log( self );
                   return self;
                }
                else {
@@ -229,8 +226,8 @@ define( [
          };
 
          Customer.prototype.getBooks = function() {
-            console.log( "getBooks for bookId map:" );
-            console.log( this.books );
+            // console.log( "getBooks for bookId map:" );
+            // console.log( this.books );
             return getDocumentsByIdMap( Book, this.books );
          };
 
@@ -266,10 +263,6 @@ define( [
 
          // //////////////////////////////////////////////////////////////////////////////////////////////////
 
-         var encodeBarcodeUuid = function( barcode ) {
-            return "barcode-" + barcode;
-         };
-
          var getDocument = function( Klass, id ) {
             return ( new Klass( id ) ).get();
          };
@@ -286,19 +279,6 @@ define( [
                }
             } );
          };
-
-         var setNewBarcodeForObject = function( obj, barcode ) {
-            var newBarcodeObj = new Barcode( barcode );
-            return newBarcodeObj.get().then( function( barcodeObject ) {
-               if( !barcodeObject ) {
-                  newBarcodeObj.reference = obj.id;
-                  return newBarcodeObj.put();
-               }
-               else {
-                  return null;
-               }
-            } );
-         }
 
          var scanDocuments = function( Klass, searchText ) {
             return db.scanDocuments( Klass.idPrefix, searchText ).then( function( response ) {
@@ -368,7 +348,7 @@ define( [
                barcodeObj.reference = book.id;
                barcodeObj.put();
             } );
-         }
+         };
 
          // /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -395,6 +375,41 @@ define( [
             return checksum == 0;
          };
 
+
+         var initializeWithLocalStorage = function() {
+            var dbServer = dbm.restDbOnRemoteServer( $http, "/db" );
+            var dbLocalStorage = dbm.restDbOnLocalStorage( window.localStorage, q );
+            db = dbServer;
+            console.log( "Fill local storage" );
+            getAllDocuments( Book )
+            .then( function( books ) {
+               dbLocalStorage.load( books );
+               console.log( "Filled local storage with books." );
+               return getAllDocuments( Barcode );
+            })
+            .then( function( barcodes ) {
+               dbLocalStorage.load( barcodes );
+               console.log( "Filled local storage with barcodes." );
+               return getAllDocuments( Customer );
+            })
+            .then( function( customers ) {
+               dbLocalStorage.load( customers );
+               console.log( "Filled local storage with customers." );
+               return true;
+            })
+            .then( function() { 
+               db = dbLocalStorage;
+            });
+         };
+
+         var initializeWithDirectRemoteServer = function() {
+            var dbServer = dbm.restDbOnRemoteServer( $http, "/db" );
+            db = dbServer;
+         };
+         
+         initializeWithDirectRemoteServer();
+         // initializeWithLocalStorage();
+         
          // //////////////////////////////////////////////////////////////////////////////////////////////////
 
          return {

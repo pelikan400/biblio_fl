@@ -1,7 +1,6 @@
 import cherrypy
 import anydbm
 import json
-from StdSuites.Type_Names_Suite import PostScript_picture
 # import traceback
 
 ##############################################################################################################

@@ -23,9 +23,15 @@
    </div>
 
    <div class="control-group">
-      <label class="control-label">Menge</label>
+      <label class="control-label">Etikettenbögen</label>
       <div class="controls">
-         <input type="text" ng-model="quantity" />
+         <select ng-model="quantity">
+            <option value="1" selected="selected">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+         </select>
       </div>
    </div>
 

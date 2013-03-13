@@ -281,11 +281,12 @@ define( [
          };
 
          
-         var scanDocuments = function( Klass, searchText, db ) {
+         var scanDocuments = function( Klass, searchText, idPrefix, db ) {
             if( !db ) {
                db = defaultDb;
             }
-            return db.scanDocuments( Klass.idPrefix, searchText ).then( function( response ) {
+            idPrefix = idPrefix ? idPrefix : Klass.idPrefix;
+            return db.scanDocuments( idPrefix, searchText ).then( function( response ) {
                if( response ) {
                   var docs = [];
                   var docArray = response.items;
@@ -415,19 +416,21 @@ define( [
 
             
             getAllDocuments( Book )
-            .then( function( books ) {
-               dbLocalStorage.load( books );
-               console.log( "Filled local storage with books." );
+            .then( function( documents ) {
+               dbLocalStorage.load( documents );
                return getAllDocuments( Barcode );
             })
-            .then( function( barcodes ) {
-               dbLocalStorage.load( barcodes );
-               console.log( "Filled local storage with barcodes." );
+            .then( function( documents ) {
+               dbLocalStorage.load( documents );
+               return scanDocuments( Document, null, "config" );
+            })
+            .then( function( documents ) {
+               dbLocalStorage.load( documents );
                return getAllDocuments( Customer );
             })
-            .then( function( customers ) {
-               dbLocalStorage.load( customers );
-               console.log( "Filled local storage with customers." );
+            .then( function( documents ) {
+               dbLocalStorage.load( documents );
+               console.log( "Filled local storage." );
                return true;
             })
             .then( function() { 

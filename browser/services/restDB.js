@@ -1,50 +1,19 @@
 "use strict";
 
 define( [ "underscore" ], function( _ ) {
-   function LocalStorage() {
-      console.log( "new local storage." );
-      this.store = window.localStorage;
-      this.modifiedItemsMap = {};
+   function now() {
+      return new Date();
    }
-      
-   
-   LocalStorage.prototype.get = function( id ) {
-      var objJSON = this.store.getItem( id );
-      if( objJSON ) {
-         return JSON.parse( objJSON );
-      }
-      else {
-         return null;
-      }
-   };
-   
-   LocalStorage.prototype.put = function( id, obj ) {
-      var objJSON = JSON.stringify( obj );
-      this.store.setItem( id, objJSON );
-      this.modifiedItemsMap[ id ] = id;
-      return obj;
-   };
-   
-   LocalStorage.prototype.load = function( documentArray ) {
-      var self = this;
-      _.each( documentArray, function( doc ) {
-         self.put( doc.id, doc );
-      });
-   };
-   
-   LocalStorage.prototype.sync = function() {
-      
-   };
-
    
    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
    function RestDBOnLocalStorage( ls, q ) {
       this.localStorage = ls;
       this.q = q;
-      this.modifiedItemsMap = {};
+      this.lastSynced = now();
    }
 
+   
    RestDBOnLocalStorage.prototype.scanDocuments = function( idPrefix, searchText ) {
       console.log( "searching for: '" + searchText + "' on prefix: " + idPrefix );
       
@@ -83,14 +52,13 @@ define( [ "underscore" ], function( _ ) {
       return this.q.when( this.getDocumentSynchronous( id ) );
    }; 
    
-   
    RestDBOnLocalStorage.prototype.putDocumentSynchronous = function( id, data ) {
       // this.localStorage.setItem( id, JSON.stringify( data ) );
       this.localStorage[ id ] = JSON.stringify( data );
-      this.modifiedItemsMap[ id ] = id;
       return data;
    };
 
+   
    RestDBOnLocalStorage.prototype.putDocument = function( id, data ) {
       return this.q.when( this.putDocumentSynchronous( id, data ) );
    };
@@ -101,6 +69,7 @@ define( [ "underscore" ], function( _ ) {
       return this.q.when( null );
    };
 
+   
    RestDBOnLocalStorage.prototype.load = function( documentArray ) {
       var self = this;
       _.each( documentArray, function( doc ) {
@@ -108,17 +77,51 @@ define( [ "underscore" ], function( _ ) {
       });
       return null;
    };
+
+   
    
    RestDBOnLocalStorage.prototype.sync = function() {
+      var countLimit = 30;
       var self = this;
-      var unsyncedObjectsMap = {}; 
-      _.each( self.modifiedItemsMap, function( value, key ) {
-         unsyncedObjectsMap[ key ] = this.getDocumentSynchronous( key );
+      var lastSyncedTime = self.lastSynced.getTime();
+      var itemMap = {};
+      var modifiedItemMap = {};
+      var countItems = 0;
+      for( var i = 0; i < this.localStorage.length && countItems < countLimit; ++i ){
+         var key = this.localStorage.key( i );
+         var objJSON = this.localStorage[ key ];
+         var obj = JSON.parse( objJSON );
+         if( !obj.lastModified ) {
+            obj.lastModified = self.lastSynced;
+            itemMap[ key ] = obj;
+            ++countItems;
+            modifiedItemMap[ key ] = obj;
+         } else {
+            var lastModified = new Date( obj.lastModified );
+            if( lastModified.getTime() - lastSyncedTime >= 0 ) {
+               itemMap[ key ] = obj;
+               ++countItems;
+            }
+         }
+      }
+      
+      _.each( modifiedItemMap, function( value, key ) {
+         self.localStorage[ key ] = JSON.stringify( value );
       });
-      return { unsyncedObjectsMap: unsyncedObjectsMap, modifiedItemsMap: self.modifiedItemsMap };
-      self.modifiedItemsMap = {};
+      
+      if( countItems > 0 ) {
+         return itemMap;
+      }
+      else {
+         return null;
+      }
    };
 
+   
+   RestDBOnLocalStorage.prototype.finalizeSync = function() {
+      this.lastSynced = now();
+   };
+   
    
    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -168,7 +171,11 @@ define( [ "underscore" ], function( _ ) {
    };
 
    RestDB.prototype.putDocument = function( id, data ) {
-      var url = this.databaseUrl + "/" + id;
+      var url = this.databaseUrl;
+      if( id ) {
+         url += "/" + id;
+      }
+      console.log( "POST on: " + url );
       return this.$http( {
          method : "POST",
          url : url,

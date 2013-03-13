@@ -7,7 +7,7 @@ define( [
    var service = [
       "$q", "$timeout", "$http", "$resource", function( q, timeout, $http, $resource ) {
 
-         var db = null;
+         var defaultDb = null;
          
          // //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -49,6 +49,7 @@ define( [
             return s.join( '' );
          }
 
+         
          function inherit( Child, Parent ) {
             _.extend( Child.prototype, Parent.prototype );
          }
@@ -72,7 +73,7 @@ define( [
          Document.prototype.get = function() {
             // TODO: where do we hold the meta informations, like etag
             var self = this;
-            return db.getDocument( self.id ).then( function( doc ) {
+            return defaultDb.getDocument( self.id ).then( function( doc ) {
                if( doc ) {
                   _.extend( self, doc );
                   self.afterGet();
@@ -88,17 +89,9 @@ define( [
          Document.prototype.put = function() {
             var self = this;
             self.lastModified = now();
-            return db.putDocument( self.id, self ).then( function( doc ) {
+            return defaultDb.putDocument( self.id, self ).then( function( doc ) {
                // console.log( "Document.put returned with:" );
-               // console.log( doc );
-               // console.log( typeof( doc ) );
                if( doc ) {
-                  if( typeof( doc ) != "object" ) {
-                     doc = JSON.parse( doc );
-                  }
-                  // console.log( self );
-                  // console.log( doc );
-                  console.log( typeof( doc ) );
                   _.extend( self, doc );
                   // console.log( self );
                   return self;
@@ -111,14 +104,18 @@ define( [
 
          Document.prototype.del = function() {
             var self = this;
-            return db.deleteDocument( self.id ).then( function( doc ) {
+            return defaultDb.deleteDocument( self.id ).then( function( doc ) {
                return self;
             } );
          };
 
          // a hook to correct objects created from JSON
          // for example Date fields
-         Document.prototype.afterGet = function() {};
+         Document.prototype.afterGet = function() {
+            if( this.lastModified ) {
+               this.lastModified = new Date( this.lastModified );
+            }
+         };
 
          // //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -136,7 +133,7 @@ define( [
             Document.call( this, id, Book.idPrefix );
          }
 
-         _.extend( Book.prototype, Document.prototype );
+         inherit( Book, Document );
 
          Book.idPrefix = "book-";
 
@@ -151,6 +148,8 @@ define( [
             if( this.issueDate ) {
                this.issueDate = new Date( this.issueDate );
             }
+            
+            Document.prototype.afterGet.apply( this, arguments );
          };
 
          
@@ -201,7 +200,7 @@ define( [
             this.books = {};
          }
 
-         _.extend( Customer.prototype, Document.prototype );
+         inherit( Customer, Document );
 
          Customer.idPrefix = "customer-";
 
@@ -257,7 +256,7 @@ define( [
             this.modificationDate = new Date();
          }
 
-         _.extend( Circulation.prototype, Document.prototype );
+         inherit( Circulation, Document );
 
          Circulation.idPrefix = "circulation-";
 
@@ -267,6 +266,7 @@ define( [
             return ( new Klass( id ) ).get();
          };
 
+         
          var getDocumentByBarcode = function( Klass, barcode ) {
             return ( new Barcode( barcode ) ).get().then( function( barcodeObject ) {
                if( barcodeObject ) {
@@ -280,7 +280,11 @@ define( [
             } );
          };
 
-         var scanDocuments = function( Klass, searchText ) {
+         
+         var scanDocuments = function( Klass, searchText, db ) {
+            if( !db ) {
+               db = defaultDb;
+            }
             return db.scanDocuments( Klass.idPrefix, searchText ).then( function( response ) {
                if( response ) {
                   var docs = [];
@@ -299,10 +303,12 @@ define( [
             } );
          };
 
+         
          var getAllDocuments = function( Klass ) {
             return scanDocuments( Klass );
          };
 
+         
          var getDocumentsByIdList = function( Klass, idList ) {
             var docPromises = [];
             if( !idList || idList.length == 0 ) {
@@ -375,12 +381,39 @@ define( [
             return checksum == 0;
          };
 
-
          var initializeWithLocalStorage = function() {
+            var syncTimeoutMilliseconds = 15 * 1000;
+            
             var dbServer = dbm.restDbOnRemoteServer( $http, "/db" );
             var dbLocalStorage = dbm.restDbOnLocalStorage( window.localStorage, q );
-            db = dbServer;
+            defaultDb = dbServer;
             console.log( "Fill local storage" );
+
+            var syncLocalStorage = function() {
+               var conditionalPut = function( modifiedObjectsMap ) {
+                  if( modifiedObjectsMap ) {
+                     console.log( "synchronising write cache." );
+                     return dbServer.putDocument( null, modifiedObjectsMap )
+                     .then( function() { 
+                        return true;
+                     });
+                  } else {
+                     return q.when( false );
+                  }
+               };
+
+               return conditionalPut( dbLocalStorage.sync() )
+               .then( function( result ) { 
+                  dbLocalStorage.finalizeSync();
+                  var timeoutMilliseconds = result ? 20 : syncTimeoutMilliseconds;
+                  timeout( syncLocalStorage, timeoutMilliseconds );
+               }, function( error ) {
+                  console.log( "Error while synchronizing objects. Will try again later!" );
+                  timeout( syncLocalStorage, syncTimeoutMilliseconds );
+               } );
+            };
+
+            
             getAllDocuments( Book )
             .then( function( books ) {
                dbLocalStorage.load( books );
@@ -398,17 +431,20 @@ define( [
                return true;
             })
             .then( function() { 
-               db = dbLocalStorage;
+               defaultDb = dbLocalStorage;
+               timeout( syncLocalStorage, syncTimeoutMilliseconds );
             });
          };
 
-         var initializeWithDirectRemoteServer = function() {
-            var dbServer = dbm.restDbOnRemoteServer( $http, "/db" );
-            db = dbServer;
-         };
          
-         initializeWithDirectRemoteServer();
-         // initializeWithLocalStorage();
+         // var initializeWithDirectRemoteServer = function() {
+         //    var dbServer = dbm.restDbOnRemoteServer( $http, "/db" );
+         //    db = dbServer;
+         // };
+         
+         
+         // initializeWithDirectRemoteServer();
+         initializeWithLocalStorage();
          
          // //////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -4,6 +4,7 @@ define( [ "underscore" ], function( _ ) {
     var controller = [ '$scope', "$location", "ixoidDatabase", "$q", function BarcodeController( $scope, $location, db, q ) {
        $scope.configuration = null;
        $scope.barcodeType = "books";
+       $scope.quantity = 40;
        
        db.getRawDocument( "configuration-base" )
        .then( function( configuration ) {
@@ -21,10 +22,10 @@ define( [ "underscore" ], function( _ ) {
        } );
        
        $scope.printBarcodes = function() {
-          var startCounter = $scope.configuration.counters[ $scope.barcodeType ];
-          startCounter = parseInt( startCounter );
+          var startCounter = parseInt( $scope.configuration.counters[ $scope.barcodeType ] );
+          var quantity = parseInt( $scope.quantity ); 
           // right now there is only one label sheet type
-          var endCounter = startCounter + 40;
+          var endCounter = startCounter + quantity;
           $scope.configuration.counters[ $scope.barcodeType ] = endCounter;
           var companyName = encodeURIComponent( $scope.configuration.companyName );
           $scope.configuration.put()

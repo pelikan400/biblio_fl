@@ -1,6 +1,7 @@
 import cherrypy
 import anydbm
 import json
+from StdSuites.Type_Names_Suite import PostScript_picture
 # import traceback
 
 ##############################################################################################################
@@ -176,28 +177,39 @@ class Resource( object ):
    def PUT( self, *args ):
       return self.POST( *args )
    
+   def postItem( self, role, key, data ):
+      itemKey = key.encode( "UTF-8" )
+      """ key is in unicode and data is an object"""
+      itemJSON = self.db.getItem( role, itemKey )
+      if itemJSON :
+         item = json.loads( itemJSON )
+         print "Item before expand: %s" % item
+         self.expandObject( item, data )
+      else :
+         item = data
+      print "Item after expand: %s" % item
+      
+      item = self.db.putItem( role, itemKey, json.dumps( item ) )
+      return item.encode( "UTF-8" )
+      
+   
    def POST( self, *args ):
       print( "%s with args: %s" % ( "POST", args ) )
       role = self.getRole()
       cherrypy.response.headers[ "Content-Type" ] = "application/json;charset=UTF-8"
+      dataAsJSON = unicode( cherrypy.request.body.read(), "UTF-8" )
+      data = json.loads( dataAsJSON )
+      print "PUT: Got data: %s %s" % ( "", data ) 
       if len( args ) == 1 :
          itemKey = args[ 0 ]
          # itemKey = unicode( args[ 0 ], "UTF-8"  )
-         dataAsJSON = unicode( cherrypy.request.body.read(), "UTF-8" )
-         # TODO transform data from JSON to internal structure
-         data = json.loads( dataAsJSON )
-         print "PUT: Got key: %s and data: %s from browser" % ( itemKey, data ) 
-         itemJSON = self.db.getItem( role, itemKey )
-         if itemJSON :
-            item = json.loads( itemJSON )
-            print "Item before expand: %s" % item
-            self.expandObject( item, data )
-         else :
-            item = data
-         print "Item after expand: %s" % item
-         
-         item = self.db.putItem( role, itemKey, json.dumps( item ) )
-         return item.encode( "UTF-8" )
+         print "PUT: Got key: %s  %s" % ( itemKey, type( itemKey ) ) 
+         return self.postItem( itemKey, data )
+      else :
+         print "type of data is: %s" % type( data )
+         for key, value in data.items() :
+            self.postItem( role, key, value )
+         return ""
       cherrypy.response.status = 500
       return ""
    

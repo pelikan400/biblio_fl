@@ -9,18 +9,25 @@
 
 <form class="form-horizontal" data-ng-submit="printBarcodes()">
 	<div class="control-group">
-		<label class="control-label">Barcodes für Bücher</label>
+		<label class="control-label"> Barcodes für Bücher</label>
 		<div class="controls">
 			<input type="text" ng-model="configuration.counters.books" />
 		</div>
 	</div>
 
-	<div class="control-group">
-		<label class="control-label">Barcodes für Kunden</label>
-		<div class="controls">
-			<input type="text" ng-model="configuration.counters.customers" />
-		</div>
-	</div>
+   <div class="control-group">
+      <label class="control-label">Barcodes für Kunden</label>
+      <div class="controls">
+         <input type="text" ng-model="configuration.counters.customers" />
+      </div>
+   </div>
+
+   <div class="control-group">
+      <label class="control-label">Menge</label>
+      <div class="controls">
+         <input type="text" ng-model="quantity" />
+      </div>
+   </div>
 
 	<div class="control-group">
 		<label class="control-label">Name der Bibliothek</label>

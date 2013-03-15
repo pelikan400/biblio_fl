@@ -7,6 +7,7 @@ define( [
    var service = [
       "$q", "$timeout", "$http", "$resource", function( q, timeout, $http, $resource ) {
 
+         var stopSynchronisation_ = false;
          var defaultDb = null;
          
          // //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,6 +21,12 @@ define( [
          var now = function() {
             return new Date();
          };
+         
+         // //////////////////////////////////////////////////////////////////////////////////////////////////
+         
+         function timestamp() {
+             return now().getTime();
+         }
          
          // //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +95,6 @@ define( [
 
          Document.prototype.put = function() {
             var self = this;
-            self.lastModified = now();
             return defaultDb.putDocument( self.id, self ).then( function( doc ) {
                // console.log( "Document.put returned with:" );
                if( doc ) {
@@ -112,9 +118,6 @@ define( [
          // a hook to correct objects created from JSON
          // for example Date fields
          Document.prototype.afterGet = function() {
-            if( this.lastModified ) {
-               this.lastModified = new Date( this.lastModified );
-            }
          };
 
          // //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,8 +160,7 @@ define( [
             var weeks = 0;
             if( this.issuedStatus == "ISSUED" && this.issueDate ) {
                var oneWeekInMilliseconds = 1000 * 3600 * 24 * 7;
-               var now = new Date();
-               var deltaIssued = now.getTime() - this.issueDate.getTime();
+               var deltaIssued = timestamp() - this.issueDate.getTime();
                weeks = Math.floor( deltaIssued / oneWeekInMilliseconds );
             }
             
@@ -175,20 +177,20 @@ define( [
 
          
          Book.prototype.issueAction = function( customerId ) {
-            var now = new Date();
-            if( !now.isSameDay( this.returnDate ) || this.issuedBy != customerId ) {
-               this.issueDate = now;
+             var n = now();
+            if( !n.isSameDay( this.returnDate ) || this.issuedBy != customerId ) {
+               this.issueDate = n;
             }
-            this.dueDate = now.addDays( 14 );
+            this.dueDate = n.addDays( 14 );
             this.issuedStatus = this.ISSUED;
             this.issuedBy = customerId;
          };
 
          
          Book.prototype.returnAction = function() {
-            var now = new Date();
+             var n = now();
             this.issuedStatus = this.RETURNED;
-            this.returnDate = now;
+            this.returnDate = n;
             this.dueDate = null;
          };
 
@@ -281,12 +283,12 @@ define( [
          };
 
          
-         var scanDocuments = function( Klass, searchText, idPrefix, db ) {
+         var scanDocuments = function( Klass, searchText, idPrefix, db, lastModifiedTimestamp ) {
             if( !db ) {
                db = defaultDb;
             }
             idPrefix = idPrefix ? idPrefix : Klass.idPrefix;
-            return db.scanDocuments( idPrefix, searchText ).then( function( response ) {
+            return db.scanDocuments( idPrefix, searchText, lastModifiedTimestamp ).then( function( response ) {
                if( response ) {
                   var docs = [];
                   var docArray = response.items;
@@ -383,7 +385,7 @@ define( [
          };
 
          var initializeWithLocalStorage = function() {
-            var syncTimeoutMilliseconds = 15 * 1000;
+            var syncTimeoutMilliseconds = 30 * 1000;
             
             var dbServer = dbm.restDbOnRemoteServer( $http, "/db" );
             var dbLocalStorage = dbm.restDbOnLocalStorage( window.localStorage, q );
@@ -391,42 +393,55 @@ define( [
             console.log( "Fill local storage" );
 
             var syncLocalStorage = function() {
+                if( stopSynchronisation_ ) {
+                    return;
+                }
                var conditionalPut = function( modifiedObjectsMap ) {
                   if( modifiedObjectsMap ) {
-                     console.log( "synchronising write cache." );
+                     console.log( "Synchronising write cache." );
                      return dbServer.putDocument( null, modifiedObjectsMap )
                      .then( function() { 
                         return true;
                      });
                   } else {
-                     return q.when( false );
+                      return q.when( false );
                   }
                };
 
                return conditionalPut( dbLocalStorage.sync() )
                .then( function( result ) { 
-                  dbLocalStorage.finalizeSync();
-                  var timeoutMilliseconds = result ? 20 : syncTimeoutMilliseconds;
-                  timeout( syncLocalStorage, timeoutMilliseconds );
+                  if( result ) {
+                      // more partial results to write 
+                      // console.log( "more partial results will follow" )
+                      timeout( syncLocalStorage, 20 );
+                  }
+                  else {
+                      // console.log( "No more partial results." )
+                     dbLocalStorage.finalizeSync();
+                     timeout( syncLocalStorage, syncTimeoutMilliseconds );
+                  }
                }, function( error ) {
                   console.log( "Error while synchronizing objects. Will try again later!" );
+                  dbLocalStorage.resetSyncKeyMap();
                   timeout( syncLocalStorage, syncTimeoutMilliseconds );
                } );
             };
 
-            
-            getAllDocuments( Book )
+            scanDocuments( Book, null, null, null, dbLocalStorage.lastSyncedTimestamp )
             .then( function( documents ) {
                dbLocalStorage.load( documents );
-               return getAllDocuments( Barcode );
+               return scanDocuments( Barcode, null, null, null, dbLocalStorage.lastSyncedTimestamp );
+               // return getAllDocuments( Barcode );
             })
             .then( function( documents ) {
                dbLocalStorage.load( documents );
-               return scanDocuments( Document, null, "config" );
+               return scanDocuments( Document, null, "config", null, dbLocalStorage.lastSyncedTimestamp );
+               // return scanDocuments( Document, null, "config" );
             })
             .then( function( documents ) {
                dbLocalStorage.load( documents );
-               return getAllDocuments( Customer );
+               return scanDocuments( Customer, null, null, null, dbLocalStorage.lastSyncedTimestamp );
+               // return getAllDocuments( Customer );
             })
             .then( function( documents ) {
                dbLocalStorage.load( documents );
@@ -461,6 +476,9 @@ define( [
             Book : Book,
             Customer : Customer,
             Circulation : Circulation,
+            stopSynchronisation : function( ) {
+                 stopSynchronisation_ = true;
+            },
 
             getRawDocument : function( id ) {
                return getDocument( Document, id );

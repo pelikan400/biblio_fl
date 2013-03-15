@@ -18,11 +18,17 @@ define( [ "underscore" ], function( _ ) {
    function RestDBOnLocalStorage( ls, q ) {
       this.localStorage = ls;
       this.q = q;
-      this.lastSyncedTimestamp = now().getTime();
+      this.resetLastSyncedTimestamp();
+      this.resetSyncKeyMap();
    }
 
-   
-   RestDBOnLocalStorage.prototype.scanDocuments = function( idPrefix, searchText ) {
+
+   RestDBOnLocalStorage.prototype.localUnsynchronizedKeys = {
+       "localStorageConfig" : "localStorageConfig"
+   };
+
+
+   RestDBOnLocalStorage.prototype.scanDocuments = function( idPrefix, searchText, lastModifiedTimestamp ) {
       console.log( "searching for: '" + searchText + "' on prefix: " + idPrefix );
       
       var items = [];
@@ -43,11 +49,7 @@ define( [ "underscore" ], function( _ ) {
 
    
    RestDBOnLocalStorage.prototype.getDocumentSynchronous = function( id ) {
-      // var objJSON = this.localStorage.getItem( id );
       var objJSON = this.localStorage[ id ];
-      // console.log( "getDocument for " + id + " returned " + objJSON );
-      // console.log( this.localStorage );
-      
       if( ! objJSON ) {
          return null;
       }
@@ -59,15 +61,16 @@ define( [ "underscore" ], function( _ ) {
    RestDBOnLocalStorage.prototype.getDocument = function( id ) {
       return this.q.when( this.getDocumentSynchronous( id ) );
    }; 
+
    
    RestDBOnLocalStorage.prototype.putDocumentSynchronous = function( id, data ) {
-      // this.localStorage.setItem( id, JSON.stringify( data ) );
       this.localStorage[ id ] = JSON.stringify( data );
       return data;
    };
 
    
    RestDBOnLocalStorage.prototype.putDocument = function( id, data ) {
+      data.lastModifiedTimestamp = timestamp();
       return this.q.when( this.putDocumentSynchronous( id, data ) );
    };
 
@@ -88,32 +91,52 @@ define( [ "underscore" ], function( _ ) {
 
    
    
+   RestDBOnLocalStorage.prototype.resetLastSyncedTimestamp = function() {
+      this.lastSyncedTimestamp = timestamp();
+      this.config = this.getDocumentSynchronous( "localStorageConfig" );
+      if( !this.config ) {
+          this.config = {}
+          this.config.lastSyncedTimestamp = this.lastSyncedTimestamp;
+      }
+      else {
+          this.lastSyncedTimestamp = this.config.lastSyncedTimestamp;
+      }
+   };
+
+   
    RestDBOnLocalStorage.prototype.sync = function() {
-      var countLimit = 100;
       var self = this;
+      var countLimit = 10;
       var itemMap = {};
       var modifiedItemMap = {};
       var countItems = 0;
-      for( var i = 0; i < this.localStorage.length && countItems < countLimit; ++i ){
-         var key = this.localStorage.key( i );
-         var objJSON = this.localStorage[ key ];
+      for( var i = 0; i < self.localStorage.length && countItems < countLimit; ++i ) {
+         var key = self.localStorage.key( i );
+         if( ( key in self.localUnsynchronizedKeys ) || ( key in self.syncKeyMap ) ) {
+             // console.log( "Ignore key: " + key );
+             continue;
+         }
+         var objJSON = self.localStorage[ key ];
          var obj = JSON.parse( objJSON );
-         if( !obj.lastModifiedTimestamp || obj.lastModified ) {
-            delete obj.lastModified;
+         if( obj.lastModifiedTimestamp == null ) {
+             console.log( "Found " + obj.lastModifiedTimestamp + " will set to " + self.lastSyncedTimestamp + " for key: " + key );
             obj.lastModifiedTimestamp = self.lastSyncedTimestamp;
             itemMap[ key ] = obj;
+            self.syncKeyMap[ key ] = key;
             ++countItems;
             modifiedItemMap[ key ] = obj;
-         } else {
-            if(  obj.lastModifiedTimestamp - lastSyncedTime >= 0 ) {
-               itemMap[ key ] = obj;
-               ++countItems;
-            }
+         } else if(  obj.lastModifiedTimestamp > self.lastSyncedTimestamp ) {
+             console.log( " " + obj.lastModifiedTimestamp + " is later than " + self.lastSyncedTimestamp + " store key: " + key );
+             itemMap[ key ] = obj;
+             self.syncKeyMap[ key ] = key;
+             ++countItems;
          }
       }
       
       _.each( modifiedItemMap, function( value, key ) {
-         self.localStorage[ key ] = JSON.stringify( value );
+         var valueStringified = JSON.stringify( value );
+         self.localStorage[ key ] = valueStringified;
+         console.log( "Write back modified: " + key + " : " + valueStringified );
       });
       
       if( countItems > 0 ) {
@@ -124,9 +147,16 @@ define( [ "underscore" ], function( _ ) {
       }
    };
 
+   RestDBOnLocalStorage.prototype.resetSyncKeyMap = function() {
+      this.syncKeyMap = {};
+   };
+
    
    RestDBOnLocalStorage.prototype.finalizeSync = function() {
-      this.lastSynced = now();
+      this.lastSyncedTimestamp = timestamp();
+      this.config.lastSyncedTimestamp = this.lastSyncedTimestamp;
+      this.putDocumentSynchronous( "localStorageConfig", this.config );
+      this.resetSyncKeyMap();
    };
    
    
@@ -137,7 +167,7 @@ define( [ "underscore" ], function( _ ) {
       this.$http = $http;
    }
 
-   RestDB.prototype.scanDocuments = function( idPrefix, searchText ) {
+   RestDB.prototype.scanDocuments = function( idPrefix, searchText, lastModifiedTimestamp ) {
       var url = this.databaseUrl;
       var firstQueryParameter = true;
       if( idPrefix ) {
@@ -146,6 +176,10 @@ define( [ "underscore" ], function( _ ) {
       }
       if( searchText ) {
          url += ( firstQueryParameter ? "?" : "&" ) + "q=" + searchText;
+         firstQueryParameter = false;
+      }
+      if( lastModifiedTimestamp != null ) {
+         url += ( firstQueryParameter ? "?" : "&" ) + "lm=" + lastModifiedTimestamp;
          firstQueryParameter = false;
       }
 
@@ -182,7 +216,7 @@ define( [ "underscore" ], function( _ ) {
       if( id ) {
          url += "/" + id;
       }
-      console.log( "POST on: " + url );
+      // console.log( "POST on: " + url );
       return this.$http( {
          method : "POST",
          url : url,

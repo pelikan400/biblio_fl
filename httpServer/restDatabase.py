@@ -1,4 +1,5 @@
 import cherrypy
+import math
 import anydbm
 import json
 # import traceback
@@ -38,6 +39,8 @@ class BerkeleyDB:
          return False
       if not method in acl[ "methods" ] :
          return False
+      if key == None :
+         return True
       if not "keyFilter" in acl :
          return False
       keyFilter = acl[ "keyFilter" ]
@@ -51,16 +54,19 @@ class BerkeleyDB:
             if key.find( denyKeyPrefix ) == 0 :
                return False
       return True
+
       
    def __init__( self, databaseName ) :
       self.databaseName = databaseName
       self.db = anydbm.open( self.databaseName, "c" )
+
 
    def getItem( self, role, itemKey ) : 
       if self.filterItem( role, "GET", itemKey ) :
          if itemKey in self.db :
             return unicode( self.db[ itemKey ], "UTF-8" )
       return None
+
 
    def putItem( self, role, itemKey, item ) :
       if self.filterItem( role, "PUT", itemKey ) :
@@ -69,6 +75,7 @@ class BerkeleyDB:
          return item
       return None
 
+
    def deleteItem( self, role, itemKey ):
       if self.filterItem( role, "DELETE", itemKey ) :
          key = itemKey.encode( "UTF-8" )
@@ -76,13 +83,16 @@ class BerkeleyDB:
             del self.db[ key ]
       return None
 
-   def allItems( self, role, idPrefix, searchPattern, timestamp = None, page = 1, pageSize = 20 ) :
+
+   def allItems( self, role, idPrefix, searchPattern, timestamp = None, page = 1, pageSize = 100000 ) :
+      if not self.filterItem( role, "GET", None ):
+         return None
       page = page - 1
-      beginCounter = ( page - 1 ) * pageSize
-      if beginCounter < 0 :
-         beginCounter = 0
+      if page < 0 :
+         page = 0
+      beginCounter = page * pageSize
       endCounter = beginCounter + pageSize
-      data = '{ "items" : [ ' 
+      dataOutput = '{ "items" : [ ' 
       first = True
       itemCounter = 0
       for key, valueAscii in self.db.items() :
@@ -91,33 +101,28 @@ class BerkeleyDB:
          if idPrefix and key.find( idPrefix ) != 0 :
             continue
          value = unicode( valueAscii, "UTF-8" )
-         data = JSON.loads( value )
+         data = json.loads( value )
          if searchPattern and value.find( searchPattern ) == -1 :
             continue
-         if timestamp and ( lastModifiedTimestamp in data ) and data.lastModifiedTimestamp > timestamp :
+         if timestamp and ( "lastModifiedTimestamp" in data ) and data[ "lastModifiedTimestamp" ] < timestamp :
             continue
          if itemCounter < beginCounter :
-            itemCounter += 1
             continue
          if itemCounter >= endCounter :
             break
-         if itemCounter >= pageSize :
-            continue
          if first : 
             first = False
          else :
-            data += ","
-         data += '%s' % value
-         pass
-      data += ' ], '
-      totalPages = itemCounter / pageSize + 1 
-      data += ' "page" : %s, ' % page
-      data += ' "pageSize" : %s, ' % pageSize
-      data += ' "totalPages" : %s }' % totalPages
-      return data
+            dataOutput += ","
+         dataOutput += '%s' % value
+         itemCounter += 1
+      dataOutput += ' ], '
+      totalPages = int( math.ceil( float( itemCounter ) / pageSize ) )
+      dataOutput += ' "page" : %s, ' % page
+      dataOutput += ' "pageSize" : %s, ' % pageSize
+      dataOutput += ' "totalPages" : %s }' % totalPages
+      return dataOutput
 
-   # TODO implement scan
-   # TODO can we keep the db in the session ?
 
    def close( self ) :
       if self.db : 

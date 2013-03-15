@@ -129,7 +129,7 @@ define( [ "jquery" ], function( jquery ) {
             book.returnAction();
             return book.put()
             .then( function( book ) {
-               $scope.infoMessage( "'" + book.title + "' zurückgebracht." );
+               $scope.warningMessage( "'" + book.title + "' zurückgebracht." );
                // change the logged in customer to the one specified on the book
                if( !$scope.customer || book.issuedBy != $scope.customer.id ) {
                   // the customer is only needed because of createCirculation
@@ -156,7 +156,7 @@ define( [ "jquery" ], function( jquery ) {
             return null;
          }
          else {
-            $scope.infoMessage( "'" + book.title + "' ausgeliehen." );
+            $scope.errorMessage( "'" + book.title + "' ausgeliehen." );
             console.log( "book is RETURNED and will be ISSUED" );
             console.log( "checked in customer id: " + $scope.customer.id );
 

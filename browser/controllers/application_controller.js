@@ -28,6 +28,11 @@ define( function() {
 
         $scope.ixoidMessages = [];
         
+        $scope.stopSynchronisation = function() {
+            $scope.infoMessage( "Synchronisation stopped." );
+            db.stopSynchronisation();
+        };
+        
         $scope.errorMessage = function( msg ) {
            console.log( msg );
            $scope.ixoidMessages.push( {

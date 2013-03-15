@@ -180,8 +180,8 @@ class Label( object ) :
            startCounter = 0
         if endCounter < 0 :
            endCounter = startCounter + 2
-        if endCounter - startCounter > 200 : 
-           endCounter = startCounter + 200
+        if endCounter - startCounter > 400 : 
+           endCounter = startCounter + 400
         while True:
            self.drawDestinationDescription( destinationDescription )
            x = self.labelSheet[ "offsetX" ]

@@ -76,7 +76,7 @@ class BerkeleyDB:
             del self.db[ key ]
       return None
 
-   def allItems( self, role, idPrefix, searchPattern, page = 1, pageSize = 20 ) :
+   def allItems( self, role, idPrefix, searchPattern, timestamp = None, page = 1, pageSize = 20 ) :
       page = page - 1
       beginCounter = ( page - 1 ) * pageSize
       if beginCounter < 0 :
@@ -86,12 +86,15 @@ class BerkeleyDB:
       first = True
       itemCounter = 0
       for key, valueAscii in self.db.items() :
-         value = unicode( valueAscii, "UTF-8" )
          if not self.filterItem( role, "GET", key ) :
             continue
          if idPrefix and key.find( idPrefix ) != 0 :
             continue
+         value = unicode( valueAscii, "UTF-8" )
+         data = JSON.loads( value )
          if searchPattern and value.find( searchPattern ) == -1 :
+            continue
+         if timestamp and ( lastModifiedTimestamp in data ) and data.lastModifiedTimestamp > timestamp :
             continue
          if itemCounter < beginCounter :
             itemCounter += 1
@@ -160,7 +163,8 @@ class Resource( object ):
       else :
          idPrefix = "p" in kwargs and kwargs[ "p" ] or None
          searchPattern = "q" in kwargs and kwargs[ "q" ] or None
-         item = self.db.allItems( role, idPrefix, searchPattern )
+         timestamp = "lm" in kwargs and int( kwargs[ "lm" ] ) or None
+         item = self.db.allItems( role, idPrefix, searchPattern, timestamp = timestamp )
          if item : 
             return item.encode( "UTF-8" )
       cherrypy.response.status = 500

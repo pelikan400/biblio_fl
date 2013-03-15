@@ -5,12 +5,20 @@ define( [ "underscore" ], function( _ ) {
       return new Date();
    }
    
+   
+   // //////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function timestamp() {
+      return now().getTime();
+   }
+   
+   
    // //////////////////////////////////////////////////////////////////////////////////////////////////
 
    function RestDBOnLocalStorage( ls, q ) {
       this.localStorage = ls;
       this.q = q;
-      this.lastSynced = now();
+      this.lastSyncedTimestamp = now().getTime();
    }
 
    
@@ -81,9 +89,8 @@ define( [ "underscore" ], function( _ ) {
    
    
    RestDBOnLocalStorage.prototype.sync = function() {
-      var countLimit = 30;
+      var countLimit = 100;
       var self = this;
-      var lastSyncedTime = self.lastSynced.getTime();
       var itemMap = {};
       var modifiedItemMap = {};
       var countItems = 0;
@@ -91,14 +98,14 @@ define( [ "underscore" ], function( _ ) {
          var key = this.localStorage.key( i );
          var objJSON = this.localStorage[ key ];
          var obj = JSON.parse( objJSON );
-         if( !obj.lastModified ) {
-            obj.lastModified = self.lastSynced;
+         if( !obj.lastModifiedTimestamp || obj.lastModified ) {
+            delete obj.lastModified;
+            obj.lastModifiedTimestamp = self.lastSyncedTimestamp;
             itemMap[ key ] = obj;
             ++countItems;
             modifiedItemMap[ key ] = obj;
          } else {
-            var lastModified = new Date( obj.lastModified );
-            if( lastModified.getTime() - lastSyncedTime >= 0 ) {
+            if(  obj.lastModifiedTimestamp - lastSyncedTime >= 0 ) {
                itemMap[ key ] = obj;
                ++countItems;
             }

@@ -23,7 +23,7 @@ define( [ "underscore" ], function( _ ) {
                   $scope.bookListTitle = "Liste aller ausgeliehenen Büchern";
                   $scope.bookList = bookList;
                   $scope.bookList.sort( function( r1, r2 ) {
-                      return r1.dueDate.getTime() - r2.dueDate.getTime();
+                      return r1.issueDate.getTime() - r2.issueDate.getTime();
                   });
                   _.each( bookList, function( book ) {
                       customerIdList.push( book.issuedBy );

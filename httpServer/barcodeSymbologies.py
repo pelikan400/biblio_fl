@@ -162,7 +162,7 @@ class BarcodeEAN( Barcode ) :
 ##############################################################################################################
 
 class BarcodeITF( Barcode ) :
-    encodingList = [
+    encodingList25 = [
         "11991",
         "91119",
         "19119",
@@ -177,6 +177,22 @@ class BarcodeITF( Barcode ) :
         "911"  # stop
     ]
 
+    encodingList20 = [
+        "11221",
+        "21112",
+        "12112",
+        "22111",
+        "11212",
+        "21211",
+        "12211",
+        "11122",
+        "21121",
+        "12121",
+        "1111", # start
+        "211"  # stop
+    ]
+
+    encodingList = encodingList20
     def __init__( self, computeChecksum = False ) :
        Barcode.__init__( self, computeChecksum = computeChecksum )
 

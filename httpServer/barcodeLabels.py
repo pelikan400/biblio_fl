@@ -14,7 +14,7 @@ pageA4HeightInPoints = cmToPoints( 29.7 )
 ##############################################################################################################
 
 class Label( object ) : 
-    barWidth = 1.0 # 0.8
+    barWidth = 1.0
     barHeight = cmToPoints( 1.0 )
     withChecksum = True
 
